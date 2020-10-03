@@ -1,13 +1,24 @@
-fn hello() {
-    println!("Hello world!")
-}
+//! Unofficial Imgur API interface
 
-#[cfg(test)]
-mod tests {
-    use crate::hello;
+#![warn(
+// Harden built-in lints
+missing_copy_implementations,
+missing_debug_implementations,
+missing_docs,
+unreachable_pub,
 
-    #[test]
-    fn test_hello() {
-        hello()
-    }
-}
+// Harden clippy lints
+clippy::cargo_common_metadata,
+clippy::clone_on_ref_ptr,
+clippy::dbg_macro,
+clippy::decimal_literal_representation,
+clippy::float_cmp_const,
+clippy::get_unwrap,
+clippy::integer_arithmetic,
+clippy::integer_division,
+clippy::print_stdout,
+)]
+
+pub mod model;
+pub mod api;
+pub mod serialization;
