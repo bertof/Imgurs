@@ -3,6 +3,11 @@ name = "imgurs"
 version = "0.1.0"
 authors = ["Filippo Berto <berto.f@protonmail.com>"]
 edition = "2018"
+categories = ["API"]
+keywords = ["Imgur", "api"]
+repository = "https://github.com/bertof/Imgurs"
+license = "MIT"
+description = "A typed and safe interface to the Imgur API"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
