@@ -1,6 +1,10 @@
 //! Authentication data
 
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+
+use crate::model::common::{AccountID, AccountUsername};
+use crate::serialization::unix_epoch;
 
 /// User access token
 ///
@@ -38,3 +42,22 @@ pub struct AuthorizationCode(pub String);
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct PINCode(pub String);
+
+/// Type of the obtained token
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct TokenType(pub String);
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AuthorizationResponse {
+    access_token: AccessToken,
+    account_id: AccountID,
+    account_username: AccountUsername,
+    #[serde(with = "unix_epoch")]
+    expires_in: DateTime<Utc>,
+    refresh_token: RefreshToken,
+    scope: serde_json::Value,
+    token_type: TokenType,
+}
+

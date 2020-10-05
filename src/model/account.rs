@@ -55,7 +55,7 @@ pub struct UserFollow {
 mod test {
     use std::{env::var, error::Error};
 
-    use crate::client::imgur_client;
+    use crate::api::Client;
     use crate::model::account::Account;
     use crate::model::basic::Basic;
 
@@ -73,9 +73,9 @@ mod test {
     #[tokio::test]
     async fn test_deserialize_account_remote() -> Result<(), Box<dyn Error>> {
         let client_id = var("CLIENT_ID")?;
-        let client = imgur_client(&client_id)?;
+        let client = Client::new(&client_id, None, None)?;
 
-        let account = client
+        let account = client.inner
             .get("https://api.imgur.com/3/account/ghostinspector")
             .send().await?
             .json::<Basic<Account>>().await?;

@@ -79,7 +79,7 @@ mod test {
     use std::error::Error;
 
     use crate::{
-        client::imgur_client,
+        api::Client,
         model::{album::Album, basic::Basic},
     };
 
@@ -97,9 +97,9 @@ mod test {
     #[tokio::test]
     async fn test_deserialize_album_remote() -> Result<(), Box<dyn Error>> {
         let client_id = var("CLIENT_ID")?;
-        let client = imgur_client(&client_id)?;
+        let client = Client::new(&client_id, None, None)?;
 
-        let data = client
+        let data = client.inner
             .get("https://api.imgur.com/3/album/z6B0j")
             .send().await?
             .json::<Basic<Album>>().await?;

@@ -3,13 +3,13 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::model::common::AccountID;
+use crate::model::common::{AccountID, AccountUsername};
 use crate::serialization::unix_epoch;
 
 /// The base model for a comment.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-#[serde(deny_unknown_fields)]
+// #[serde(deny_unknown_fields)]
 pub struct Comment {
     /// The ID for the comment
     pub id: u64,
@@ -18,7 +18,7 @@ pub struct Comment {
     /// The comment itself.
     pub comment: String,
     /// Username of the author of the comment
-    pub author: String,
+    pub author: Option<AccountUsername>,
     /// The account ID for the author
     pub author_id: AccountID,
     /// If this comment was done to an album
@@ -55,9 +55,15 @@ mod test {
     use std::env::var;
     use std::error::Error;
 
-    use crate::client::imgur_client;
-    use crate::model::basic::Basic;
-    use crate::model::comment::Comment;
+    use serde_json::Value;
+
+    use crate::{
+        api::Client,
+        model::{
+            basic::Basic,
+            comment::Comment,
+        },
+    };
 
     #[test]
     fn test_deserialize_comment_local() -> Result<(), Box<dyn Error>> {
@@ -73,9 +79,9 @@ mod test {
     #[tokio::test]
     async fn test_deserialize_comment_remote() -> Result<(), Box<dyn Error>> {
         let client_id = var("CLIENT_ID")?;
-        let client = imgur_client(&client_id)?;
+        let client = Client::new(&client_id, None, None)?;
 
-        let data = client
+        let data = client.inner
             .get("https://api.imgur.com/3/comment/1938633683")
             .send().await?
             .json::<Basic<Comment>>().await?;

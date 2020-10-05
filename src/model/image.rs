@@ -4,7 +4,6 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::model::common::AccountID;
 use crate::serialization::unix_epoch;
 
 /// The base model for an image.

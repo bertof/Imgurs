@@ -8,6 +8,9 @@ use crate::serialization::unix_epoch;
 /// Unique identifier for an Imgur user
 pub type AccountID = u64;
 
+/// Unique human readable identifier for a Imgur user
+pub type AccountUsername = String;
+
 /// Pro status expiration
 ///
 /// `Boolean(false)` if not a pro user, their expiration date if they are.
