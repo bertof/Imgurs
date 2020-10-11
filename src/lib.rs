@@ -22,3 +22,5 @@ clippy::print_stdout,
 pub mod model;
 pub mod api;
 pub mod serialization;
+pub mod traits;
+pub mod error;

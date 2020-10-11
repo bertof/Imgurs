@@ -75,13 +75,14 @@ pub struct Album {
 
 #[cfg(test)]
 mod test {
-    use std::env::var;
     use std::error::Error;
 
     use crate::{
         api::Client,
         model::{album::Album, basic::Basic},
     };
+    use crate::model::authorization::{ClientID, ClientSecret};
+    use crate::traits::FromEnv;
 
     #[test]
     fn test_deserialize_album_local() -> Result<(), Box<dyn Error>> {
@@ -96,10 +97,11 @@ mod test {
 
     #[tokio::test]
     async fn test_deserialize_album_remote() -> Result<(), Box<dyn Error>> {
-        let client_id = var("CLIENT_ID")?;
-        let client = Client::new(&client_id, None, None)?;
+        let client_id = ClientID::from_default_env()?;
+        let client_secret = ClientSecret::from_default_env()?;
+        let client = Client::new(client_id, client_secret)?;
 
-        let data = client.inner
+        let data = client.client
             .get("https://api.imgur.com/3/album/z6B0j")
             .send().await?
             .json::<Basic<Album>>().await?;

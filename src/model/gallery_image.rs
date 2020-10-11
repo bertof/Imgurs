@@ -7,6 +7,7 @@ use url::Url;
 use crate::model::common::AccountID;
 use crate::serialization::unix_epoch;
 
+/// Gallery image
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[serde(deny_unknown_fields)]

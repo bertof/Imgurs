@@ -1,8 +1,7 @@
 //! API response specification
-
-use std::fmt::Debug;
-
 use serde::{Deserialize, Serialize};
+
+use crate::error::ErrorMessage;
 
 /// API response common fields
 ///
@@ -12,30 +11,52 @@ use serde::{Deserialize, Serialize};
 #[serde(deny_unknown_fields)]
 pub struct Basic<T> {
     /// Response data
-    pub data: BasicData<T>,
+    pub data: Data<T>,
     /// Success status
     pub success: bool,
     /// HTTP status
     pub status: u16,
 }
 
-/// API response result wrapper
+impl<T> Into<Result<T, ErrorMessage>> for Basic<T> {
+    fn into(self) -> Result<T, ErrorMessage> {
+        self.data.into()
+    }
+}
+
+impl<T> Basic<T> {
+    /// Convert Basic into a result
+    pub fn result(self) -> Result<T, ErrorMessage> {
+        self.into()
+    }
+}
+
+/// API response data
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[serde(deny_unknown_fields)]
 #[serde(untagged)]
-pub enum BasicData<T> {
+pub enum Data<T> {
     /// Content in the response
     Content(T),
     /// Error in the response
     Error {
         /// Error message
-        error: String,
+        error: ErrorMessage,
         /// Requested content
         request: String,
         /// Method used in the request
         method: Method,
     },
+}
+
+impl<T> Into<Result<T, ErrorMessage>> for Data<T> {
+    fn into(self) -> Result<T, ErrorMessage> {
+        match self {
+            Data::Content(v) => Ok(v),
+            Data::Error { error, request: _, method: _ } => Err(error),
+        }
+    }
 }
 
 /// HTTP methods
@@ -61,8 +82,9 @@ mod test {
 
     use crate::model::{
         account_settings::AccountSettings,
-        basic::{Basic, BasicData, Method},
+        basic::{Basic, Data, Method},
     };
+    use crate::model::basic::ErrorMessage;
 
     #[test]
     fn test_error_parsing_local() -> Result<(), Box<dyn Error>> {
@@ -80,9 +102,9 @@ mod test {
         assert!(!data.success);
         assert_eq!(data.status, 401);
         match data.data {
-            BasicData::Content(_) => panic!("Should return error"),
-            BasicData::Error { error, request, method } => {
-                assert_eq!(error, "Authentication required");
+            Data::Content(_) => panic!("Should return error"),
+            Data::Error { error, request, method } => {
+                assert_eq!(error, ErrorMessage::new("Authentication required"));
                 assert_eq!(request, "/3/account/me/settings");
                 assert_eq!(method, Method::GET);
             }
@@ -100,9 +122,9 @@ mod test {
         assert!(!data.success);
         assert_eq!(data.status, 401);
         match data.data {
-            BasicData::Content(_) => panic!("Should return error"),
-            BasicData::Error { error, request, method } => {
-                assert_eq!(error, "Authentication required");
+            Data::Content(_) => panic!("Should return error"),
+            Data::Error { error, request, method } => {
+                assert_eq!(error, ErrorMessage::new("Authentication required"));
                 assert_eq!(request, "/3/account/me/settings");
                 assert_eq!(method, Method::GET);
             }

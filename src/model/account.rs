@@ -53,11 +53,12 @@ pub struct UserFollow {
 
 #[cfg(test)]
 mod test {
-    use std::{env::var, error::Error};
-
     use crate::api::Client;
     use crate::model::account::Account;
+    use crate::model::authorization::{ClientID, ClientSecret};
     use crate::model::basic::Basic;
+    use crate::traits::FromEnv;
+    use std::error::Error;
 
     #[test]
     fn test_deserialize_account_local() -> Result<(), Box<dyn Error>> {
@@ -72,10 +73,11 @@ mod test {
 
     #[tokio::test]
     async fn test_deserialize_account_remote() -> Result<(), Box<dyn Error>> {
-        let client_id = var("CLIENT_ID")?;
-        let client = Client::new(&client_id, None, None)?;
+        let client_id = ClientID::from_default_env()?;
+        let client_secret = ClientSecret::from_default_env()?;
+        let client = Client::new(client_id, client_secret)?;
 
-        let account = client.inner
+        let account = client.client
             .get("https://api.imgur.com/3/account/ghostinspector")
             .send().await?
             .json::<Basic<Account>>().await?;

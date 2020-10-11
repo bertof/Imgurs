@@ -1,3 +1,4 @@
+//! Gallery album specification
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -6,6 +7,7 @@ use crate::model::common::AccountID;
 use crate::model::image::Image;
 use crate::serialization::unix_epoch;
 
+/// Gallery album
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[serde(deny_unknown_fields)]

@@ -1,27 +1,38 @@
+//! Custom gallery specification
 use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::model::{
+    common::AccountUsername,
     gallery_album::GalleryAlbum,
     gallery_image::GalleryImage,
 };
 
+/// Custom gallery
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[serde(deny_unknown_fields)]
 pub struct CustomGallery {
-    pub account_url: String,
+    /// Author
+    pub account_url: AccountUsername,
+    /// Link to the custom gallery
     pub link: Url,
+    /// Tags
     pub tags: Vec<String>,
+    /// Size of the gallery
     pub item_count: u64,
+    /// Contents of the gallery
     pub items: Vec<CustomGalleryItem>,
 }
 
+/// Custom gallery item
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[serde(deny_unknown_fields)]
 pub enum CustomGalleryItem {
+    /// Gallery image
     GalleryImage(GalleryImage),
+    /// Gallery album
     GalleryAlbum(GalleryAlbum),
 }
 
