@@ -23,6 +23,7 @@ pub struct GalleryProfile {
     trophies: Vec<Trophy>,
 }
 
+/// Gallery trophy
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[serde(deny_unknown_fields)]

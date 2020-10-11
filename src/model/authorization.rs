@@ -1,10 +1,66 @@
 //! Authentication data
 
+use std::convert::TryFrom;
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
+use crate::error::ErrorMessage;
 use crate::model::common::{AccountID, AccountUsername};
 use crate::serialization::unix_epoch;
+use crate::traits::FromEnv;
+
+/// Client ID
+#[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ClientID(pub String);
+
+impl TryFrom<String> for ClientID {
+    type Error = ErrorMessage;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+
+        // TODO: input checks
+
+        if value.is_empty() {
+            return Err(ErrorMessage::new("Invalid length"));
+        }
+
+        Ok(ClientID(value))
+    }
+}
+
+impl FromEnv for ClientID {
+    fn default_env() -> &'static str {
+        "CLIENT_ID"
+    }
+}
+
+/// Client secret
+#[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ClientSecret(pub String);
+
+impl TryFrom<String> for ClientSecret {
+    type Error = ErrorMessage;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+
+        // TODO: input checks
+
+        if value.is_empty() {
+            return Err(ErrorMessage::new("Invalid length"));
+        }
+
+        Ok(ClientSecret(value))
+    }
+}
+
+impl FromEnv for ClientSecret {
+    fn default_env() -> &'static str {
+        "CLIENT_SECRET"
+    }
+}
 
 /// User access token
 ///
@@ -12,9 +68,30 @@ use crate::serialization::unix_epoch;
 /// It can be thought of the user's password and username combined into one, and is used to access
 /// the user's account.
 /// It expires after 1 month
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct AccessToken(pub String);
+
+impl TryFrom<String> for AccessToken {
+    type Error = ErrorMessage;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+
+        // TODO: input checks
+
+        if value.is_empty() {
+            return Err(ErrorMessage::new("Invalid length"));
+        }
+
+        Ok(AccessToken(value))
+    }
+}
+
+impl FromEnv for AccessToken {
+    fn default_env() -> &'static str {
+        "ACCESS_TOKEN"
+    }
+}
 
 /// Refresh token
 ///
@@ -22,9 +99,30 @@ pub struct AccessToken(pub String);
 /// Since access_tokens expire after 1 month, we need a way to request new ones without going
 /// through the entire authorization step again.
 /// It does not expire.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct RefreshToken(pub String);
+
+impl TryFrom<String> for RefreshToken {
+    type Error = ErrorMessage;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+
+        // TODO: input checks
+
+        if value.is_empty() {
+            return Err(ErrorMessage::new("Invalid length"));
+        }
+
+        Ok(RefreshToken(value))
+    }
+}
+
+impl FromEnv for RefreshToken {
+    fn default_env() -> &'static str {
+        "REFRESH_TOKEN"
+    }
+}
 
 /// Authorization code
 ///
@@ -33,6 +131,27 @@ pub struct RefreshToken(pub String);
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct AuthorizationCode(pub String);
+
+impl TryFrom<String> for AuthorizationCode {
+    type Error = ErrorMessage;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+
+        // TODO: input checks
+
+        if value.is_empty() {
+            return Err(ErrorMessage::new("Invalid length"));
+        }
+
+        Ok(AuthorizationCode(value))
+    }
+}
+
+impl FromEnv for AuthorizationCode {
+    fn default_env() -> &'static str {
+        "AUTHORIZATION_CODE"
+    }
+}
 
 /// PIN code
 ///
@@ -43,21 +162,71 @@ pub struct AuthorizationCode(pub String);
 #[serde(deny_unknown_fields)]
 pub struct PINCode(pub String);
 
+impl TryFrom<String> for PINCode {
+    type Error = ErrorMessage;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+
+        // TODO: input checks
+
+        if value.is_empty() {
+            return Err(ErrorMessage::new("Invalid length"));
+        }
+
+        Ok(PINCode(value))
+    }
+}
+
+impl FromEnv for PINCode {
+    fn default_env() -> &'static str {
+        "PIN_CODE"
+    }
+}
+
 /// Type of the obtained token
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct TokenType(pub String);
 
+/// Authorization API response
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct AuthorizationResponse {
-    access_token: AccessToken,
-    account_id: AccountID,
-    account_username: AccountUsername,
+    /// Access token
+    pub access_token: AccessToken,
+    /// Account id
+    pub account_id: AccountID,
+    /// Account username
+    pub account_username: AccountUsername,
+    /// Access token expiration date
     #[serde(with = "unix_epoch")]
-    expires_in: DateTime<Utc>,
-    refresh_token: RefreshToken,
-    scope: serde_json::Value,
-    token_type: TokenType,
+    pub expires_in: DateTime<Utc>,
+    /// Refresh token
+    pub refresh_token: RefreshToken,
+    /// TODO: missing from API model
+    pub scope: serde_json::Value,
+    /// Type of the token received
+    pub token_type: TokenType,
+}
+
+/// Refresh token API response
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RefreshResponse {
+    /// Access token
+    pub access_token: AccessToken,
+    /// Account id
+    pub account_id: AccountID,
+    /// Account username
+    pub account_username: AccountUsername,
+    /// Access token expiration date
+    #[serde(with = "unix_epoch")]
+    pub expires_in: DateTime<Utc>,
+    /// Refresh token
+    pub refresh_token: RefreshToken,
+    /// TODO: missing from API model
+    pub scope: serde_json::Value,
+    /// Type of the token received
+    pub token_type: TokenType,
 }
 
