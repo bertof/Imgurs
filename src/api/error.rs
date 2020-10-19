@@ -1,9 +1,13 @@
 //! API error implementation
 
-use std::error::Error;
-use std::fmt;
+use std::{
+    error::Error,
+    fmt,
+};
 
-use http::header::ToStrError;
+use reqwest::header::{InvalidHeaderName, InvalidHeaderValue, ToStrError};
+
+use crate::error::ErrorMessage;
 
 /// Client error wrapper
 #[derive(Debug)]
@@ -14,18 +18,27 @@ pub enum ClientError {
     RequestError(reqwest::Error),
     /// JSON error
     JSONError(serde_json::Error),
-    ///
+    /// Header value to string conversion error
     ToStrError(ToStrError),
+    /// Invalid header name error
+    InvalidHeaderName(InvalidHeaderName),
+    /// Invalid value name error
+    InvalidHeaderValue(InvalidHeaderValue),
+    /// Error message
+    ErrorMessage(ErrorMessage),
 }
 
 impl fmt::Display for ClientError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", match self {
-            ClientError::UrlParseError(e) => e.to_string(),
-            ClientError::RequestError(e) => e.to_string(),
-            ClientError::JSONError(e) => e.to_string(),
-            ClientError::ToStrError(e) => e.to_string()
-        })
+        match self {
+            ClientError::UrlParseError(e) => e.fmt(f),
+            ClientError::RequestError(e) => e.fmt(f),
+            ClientError::JSONError(e) => e.fmt(f),
+            ClientError::ToStrError(e) => e.fmt(f),
+            ClientError::InvalidHeaderName(e) => e.fmt(f),
+            ClientError::InvalidHeaderValue(e) => e.fmt(f),
+            ClientError::ErrorMessage(e) => e.fmt(f),
+        }
     }
 }
 
@@ -52,5 +65,23 @@ impl From<serde_json::Error> for ClientError {
 impl From<ToStrError> for ClientError {
     fn from(e: ToStrError) -> Self {
         ClientError::ToStrError(e)
+    }
+}
+
+impl From<InvalidHeaderName> for ClientError {
+    fn from(e: InvalidHeaderName) -> Self {
+        ClientError::InvalidHeaderName(e)
+    }
+}
+
+impl From<InvalidHeaderValue> for ClientError {
+    fn from(e: InvalidHeaderValue) -> Self {
+        ClientError::InvalidHeaderValue(e)
+    }
+}
+
+impl From<ErrorMessage> for ClientError {
+    fn from(e: ErrorMessage) -> Self {
+        ClientError::ErrorMessage(e)
     }
 }

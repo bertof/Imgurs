@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::model::common::{AccountID, ProExpiration};
+use crate::model::common::{AccountID, AccountUsername, ProExpiration};
 use crate::serialization::unix_epoch;
 
 /// Basic account information representation.
@@ -41,24 +41,64 @@ pub struct Account {
     pub user_follow: UserFollow,
 }
 
-
 /// User follow status
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[serde(deny_unknown_fields)]
 pub struct UserFollow {
-    status: bool
+    /// Following status
+    pub status: bool
+}
+
+/// User blocked status
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[serde(deny_unknown_fields)]
+pub struct BlockedStatus {
+    /// Blocked status
+    pub blocked: bool
+}
+
+/// List of blocked accounts
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[serde(deny_unknown_fields)]
+pub struct AccountBlocks {
+    /// TODO: Missing from API model
+    pub items: Vec<BlockedAccount>,
+    /// TODO: Missing from API model
+    pub next: Option<serde_json::Value>,
+}
+
+/// Blocked account
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[serde(deny_unknown_fields)]
+pub struct BlockedAccount {
+    /// Account username
+    pub url: AccountUsername
+}
+
+/// Create block response
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[serde(deny_unknown_fields)]
+pub struct BlockResponse {
+    /// Blocked status
+    pub blocked: bool
 }
 
 
 #[cfg(test)]
 mod test {
-    use crate::api::Client;
+    use std::error::Error;
+
+    use crate::api::client::BasicClient;
+    use crate::api::traits::Client;
     use crate::model::account::Account;
     use crate::model::authorization::{ClientID, ClientSecret};
     use crate::model::basic::Basic;
     use crate::traits::FromEnv;
-    use std::error::Error;
 
     #[test]
     fn test_deserialize_account_local() -> Result<(), Box<dyn Error>> {
@@ -75,9 +115,9 @@ mod test {
     async fn test_deserialize_account_remote() -> Result<(), Box<dyn Error>> {
         let client_id = ClientID::from_default_env()?;
         let client_secret = ClientSecret::from_default_env()?;
-        let client = Client::new(client_id, client_secret)?;
+        let client = BasicClient::new(client_id, client_secret)?;
 
-        let account = client.client
+        let account = client.get_client()
             .get("https://api.imgur.com/3/account/ghostinspector")
             .send().await?
             .json::<Basic<Account>>().await?;
