@@ -3,7 +3,14 @@ name = "imgurs-model"
 version = "0.1.0"
 authors = ["Filippo Berto <berto.f@protonmail.com>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+categories = ["API"]
+keywords = ["Imgur", "api"]
+repository = "https://github.com/bertof/Imgurs"
+license = "MIT"
+description = "A typed and safe model of the Imgur API"
 
 [dependencies]
+chrono = { version = "^0.4", features = ["serde"] }
+serde = { version = "^1.0", features = ["derive"] }
+serde_json = "^1.0"
+url = { version = "^2", features = ["serde"] }

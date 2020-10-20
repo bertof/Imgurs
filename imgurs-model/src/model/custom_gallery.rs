@@ -2,10 +2,12 @@
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::model::{
-    common::AccountUsername,
-    gallery_album::GalleryAlbum,
-    gallery_image::GalleryImage,
+use crate::{
+    model::{
+        gallery_album::GalleryAlbum,
+        gallery_image::GalleryImage,
+        common::Username,
+    }
 };
 
 /// Custom gallery
@@ -14,7 +16,7 @@ use crate::model::{
 #[serde(deny_unknown_fields)]
 pub struct CustomGallery {
     /// Author
-    pub account_url: AccountUsername,
+    pub account_url: Username,
     /// Link to the custom gallery
     pub link: Url,
     /// Tags
@@ -65,11 +67,5 @@ mod test {
         println!("{:#?}", data);
 
         Ok(())
-    }
-
-    #[ignore]
-    #[tokio::test]
-    async fn test_deserialize_custom_gallery_remote() -> Result<(), Box<dyn Error>> {
-        unimplemented!()
     }
 }

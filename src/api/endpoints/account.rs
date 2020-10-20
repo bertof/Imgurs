@@ -5,26 +5,32 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     api::{
-        client::{AuthenticatedClient, BasicClient},
+        client::{
+            AuthenticatedClient,
+            BasicClient,
+            SortPreference,
+        },
         error::ClientError,
+        response::Response,
         traits::{Client, RegisteredClient},
     },
     model::{
-        account::{Account, BlockedStatus},
+        account::{
+            Account,
+            AccountBlocks,
+            BlockedStatus,
+        },
         basic::{Basic, Data},
-        common::AccountUsername,
+        common::Username,
+        custom_gallery::CustomGalleryItem,
     },
 };
-use crate::api::client::SortPreference;
-use crate::api::response::Response;
-use crate::model::account::AccountBlocks;
-use crate::model::custom_gallery::CustomGalleryItem;
 
 /// Account API client
 #[async_trait]
 pub trait AccountClient: Client {
     /// Get account information by username
-    async fn get_account_by_username(&self, username: &AccountUsername) -> Result<Response<Account>, ClientError> {
+    async fn get_account_by_username(&self, username: Username) -> Result<Response<Account>, ClientError> {
         let res = self.get_client()
             .get(&format!("https://api.imgur.com/3/account/{}", username))
             .headers(self.get_headers()?)
@@ -52,7 +58,7 @@ pub trait AccountClient: Client {
     // }
 
     /// Get account block status
-    async fn get_account_block_status(&self, username: &AccountUsername) -> Result<Response<BlockedStatus>, ClientError> {
+    async fn get_account_block_status(&self, username: &Username) -> Result<Response<BlockedStatus>, ClientError> {
         #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
         #[serde(rename_all = "snake_case")]
         #[serde(deny_unknown_fields)]
@@ -82,7 +88,7 @@ pub trait AccountClient: Client {
     /// Get account images
     ///
     /// TODO: missing response typing
-    async fn get_account_images(&self, username: &AccountUsername) -> Result<Response<Vec<serde_json::Value>>, ClientError> {
+    async fn get_account_images(&self, username: &Username) -> Result<Response<Vec<serde_json::Value>>, ClientError> {
         let res = self.get_client()
             .get(&format!("https://api.imgur.com/3/account/{}/images", &username))
             .headers(self.get_headers()?)
@@ -97,7 +103,7 @@ pub trait AccountClient: Client {
     /// Account gallery favorites
     ///
     /// Return the images the user has favorited in the gallery
-    async fn get_gallery_favorites(&self, username: &AccountUsername, page: Option<u64>, sort: Option<SortPreference>) -> Result<Response<Vec<CustomGalleryItem>>, ClientError> {
+    async fn get_gallery_favorites(&self, username: &Username, page: Option<u64>, sort: Option<SortPreference>) -> Result<Response<Vec<CustomGalleryItem>>, ClientError> {
         let mut url = format!("https://api.imgur.com/3/account/{}/gallery_favorites", username);
         if let Some(page) = page {
             url = format!("{}/{}", url, page);
@@ -143,7 +149,7 @@ pub trait AccountRegisteredClient: AccountClient + RegisteredClient {
     }
 
     /// Create a block for an account
-    async fn create_account_block(&self, username: &AccountUsername) -> Result<Response<BlockedStatus>, ClientError> {
+    async fn create_account_block(&self, username: &Username) -> Result<Response<BlockedStatus>, ClientError> {
         let res = self.get_client()
             .put(&format!("https://api.imgur.com/account/v1/{}/block", username))
             .headers(self.get_headers()?)
@@ -159,7 +165,7 @@ pub trait AccountRegisteredClient: AccountClient + RegisteredClient {
     }
 
     /// Remove a block for an account
-    async fn remove_account_block(&self, username: &AccountUsername) -> Result<Response<BlockedStatus>, ClientError> {
+    async fn remove_account_block(&self, username: &Username) -> Result<Response<BlockedStatus>, ClientError> {
         let res = self.get_client()
             .delete(&format!("https://api.imgur.com/account/v1/{}/block", username))
             .headers(self.get_headers()?)
@@ -176,12 +182,12 @@ pub trait AccountRegisteredClient: AccountClient + RegisteredClient {
 
     /// Get images of the current user
     async fn get_user_account_images(&self) -> Result<Response<Vec<serde_json::Value>>, ClientError> {
-        self.get_account_images(&"me".to_string()).await
+        self.get_account_images(&"me".into()).await
     }
 
     /// Get favourite galleries of the current user
     async fn get_user_gallery_favorites(&self, page: Option<u64>, sort: Option<SortPreference>) -> Result<Response<Vec<CustomGalleryItem>>, ClientError> {
-        self.get_gallery_favorites(&"me".to_string(), page, sort).await
+        self.get_gallery_favorites(&"me".into(), page, sort).await
     }
 
     // TODO: typed implementation

@@ -1,14 +1,31 @@
 //! Gallery image specification
 
+use std::fmt;
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::model::common::AccountID;
-use crate::serialization::unix_epoch;
+use crate::{
+    model::common::AccountID,
+    serialization::unix_epoch,
+};
 
 /// Gallery image unique ID
-pub type GalleryImageID = String;
+#[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
+pub struct GalleryImageID(String);
+
+impl<U> From<U> for GalleryImageID where U: Into<String> {
+    fn from(v: U) -> Self {
+        GalleryImageID(v.into())
+    }
+}
+
+impl fmt::Display for GalleryImageID {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.fmt(f)
+    }
+}
 
 /// Gallery image
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -140,11 +157,5 @@ mod test {
         println!("{:#?}", data);
 
         Ok(())
-    }
-
-    #[ignore]
-    #[tokio::test]
-    async fn test_deserialize_gallery_image_remote() -> Result<(), Box<dyn Error>> {
-        unimplemented!()
     }
 }

@@ -46,6 +46,7 @@ pub struct Image {
     /// Indicates if the image has been marked as nsfw or not. Defaults to null if information is not available.
     /// OPTIONAL, the original filename, if you're logged in as the image owner
     pub name: Option<String>,
+    /// Whether the content is NSFW
     pub nsfw: Option<bool>,
     /// If the image has been categorized by our backend then this will contain the section the image belongs in. (funny, cats, adviceanimals, wtf, etc)
     pub section: Option<String>,
@@ -103,11 +104,5 @@ mod test {
         println!("{:#?}", data);
 
         Ok(())
-    }
-
-    #[ignore]
-    #[tokio::test]
-    async fn test_deserialize_gallery_image_remote() -> Result<(), Box<dyn Error>> {
-        unimplemented!()
     }
 }

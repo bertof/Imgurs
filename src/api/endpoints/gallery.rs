@@ -17,6 +17,7 @@ use crate::{
     serialization::pretty_json,
 };
 
+/// Gallery API client
 #[async_trait]
 pub trait GalleryClient: Client {
     /// Gallery album
@@ -63,6 +64,7 @@ pub trait GalleryClient: Client {
     }
 }
 
+/// Registered client gallery API client
 #[async_trait]
 pub trait GalleryRegisteredClient: RegisteredClient {}
 

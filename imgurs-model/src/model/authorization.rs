@@ -6,10 +6,15 @@ use std::fmt;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::error::ErrorMessage;
-use crate::model::common::{AccountID, AccountUsername};
-use crate::serialization::unix_epoch;
-use crate::traits::FromEnv;
+use crate::{
+    error::ErrorMessage,
+    model::{
+        common::AccountID,
+        common::Username,
+    },
+    serialization::unix_epoch,
+    traits::FromEnv,
+};
 
 /// Client ID
 #[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
@@ -240,7 +245,7 @@ pub struct AuthorizationResponse {
     /// Account id
     pub account_id: AccountID,
     /// Account username
-    pub account_username: AccountUsername,
+    pub account_username: Username,
     /// Access token expiration date
     #[serde(with = "unix_epoch")]
     pub expires_in: DateTime<Utc>,
@@ -261,7 +266,7 @@ pub struct RefreshResponse {
     /// Account id
     pub account_id: AccountID,
     /// Account username
-    pub account_username: AccountUsername,
+    pub account_username: Username,
     /// Access token expiration date
     #[serde(with = "unix_epoch")]
     pub expires_in: DateTime<Utc>,
