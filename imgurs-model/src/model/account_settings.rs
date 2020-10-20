@@ -82,10 +82,4 @@ mod test {
 
         Ok(())
     }
-
-    #[ignore]
-    #[tokio::test]
-    async fn test_deserialize_account_settings_remote() -> Result<(), Box<dyn Error>> {
-        unimplemented!()
-    }
 }

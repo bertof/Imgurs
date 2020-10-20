@@ -1,12 +1,32 @@
 //! Album specification
 
+use std::fmt;
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use url::Url;
 
-use crate::model::common::AccountID;
-use crate::serialization::unix_epoch;
+use crate::{
+    model::common::AccountID,
+    serialization::unix_epoch,
+};
+
+/// Album unique identifier
+#[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
+pub struct AlbumID(String);
+
+impl<U> From<U> for AlbumID where U: Into<String> {
+    fn from(v: U) -> Self {
+        AlbumID(v.into())
+    }
+}
+
+impl fmt::Display for AlbumID {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.fmt(f)
+    }
+}
 
 /// The base model for an album
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -14,7 +34,7 @@ use crate::serialization::unix_epoch;
 #[serde(deny_unknown_fields)]
 pub struct Album {
     /// The ID for the album
-    pub id: String,
+    pub id: AlbumID,
     /// The title of the album in the gallery
     pub title: String,
     /// The description of the album in the gallery
@@ -77,12 +97,10 @@ pub struct Album {
 mod test {
     use std::error::Error;
 
-    use crate::{
-        api::Client,
-        model::{album::Album, basic::Basic},
+    use crate::model::{
+        album::Album,
+        basic::Basic,
     };
-    use crate::model::authorization::{ClientID, ClientSecret};
-    use crate::traits::FromEnv;
 
     #[test]
     fn test_deserialize_album_local() -> Result<(), Box<dyn Error>> {
@@ -91,22 +109,6 @@ mod test {
         let data = serde_json::from_str::<Basic<Album>>(res)?;
 
         println!("{:#?}", data);
-
-        Ok(())
-    }
-
-    #[tokio::test]
-    async fn test_deserialize_album_remote() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::from_default_env()?;
-        let client_secret = ClientSecret::from_default_env()?;
-        let client = Client::new(client_id, client_secret)?;
-
-        let data = client.client
-            .get("https://api.imgur.com/3/album/z6B0j")
-            .send().await?
-            .json::<Basic<Album>>().await?;
-
-        println!("{:?}", data);
 
         Ok(())
     }

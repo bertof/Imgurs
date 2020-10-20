@@ -84,10 +84,4 @@ mod test {
 
         Ok(())
     }
-
-    #[ignore]
-    #[tokio::test]
-    async fn test_deserialize_gallery_profile_remote() -> Result<(), Box<dyn Error>> {
-        unimplemented!()
-    }
 }

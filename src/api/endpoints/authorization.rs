@@ -1,5 +1,5 @@
 //! Authorization API wrapper
-
+use async_trait::async_trait;
 use chrono::{Duration, Utc};
 use serde::{Deserialize, Serialize};
 use serde::de::DeserializeOwned;
@@ -7,17 +7,14 @@ use tracing::debug;
 use url::Url;
 
 use crate::{
-    api::{
-        AuthenticatedClient,
-        Client,
-        error::ClientError,
-        response::Response,
-    },
+    api::{client::AuthenticatedClient, error::ClientError, response::Response},
     model::{
         authorization::{AuthorizationCode, AuthorizationResponse, PINCode, RefreshResponse},
         basic::{Basic, Data},
     },
 };
+use crate::api::client::BasicClient;
+use crate::api::traits::{Client, RegisteredClient};
 
 /// Client authorization API endpoint
 pub const CLIENT_AUTHORIZATION_URL: &str = "https://api.imgur.com/oauth2/authorize";
@@ -86,19 +83,21 @@ async fn parse_response_or_error<T: DeserializeOwned>(res: reqwest::Response) ->
     }
 }
 
-impl Client {
+/// Authentication API client
+#[async_trait]
+pub trait AuthenticationClient: Client {
     /// Generate a client authentication URL based on its client id and an authentication method
-    ///
-    /// Determines if Imgur returns an authorization_code, a PIN code, or an opaque access_token.
-    /// If you choose code, then you must immediately exchange the authorization_code for an access_token.
-    /// If you chose token, then the access_token and refresh_token will be given to you in the form of query string parameters attached to your redirect URL, which the user may be able to read.
-    /// If you chose pin, then the user will receive a PIN code that they will enter into your app to complete the authorization process.
-    pub fn get_authentication_url(&self, method: Method, state: Option<&str>) -> Result<Url, ClientError> {
+   ///
+   /// Determines if Imgur returns an authorization_code, a PIN code, or an opaque access_token.
+   /// If you choose code, then you must immediately exchange the authorization_code for an access_token.
+   /// If you chose token, then the access_token and refresh_token will be given to you in the form of query string parameters attached to your redirect URL, which the user may be able to read.
+   /// If you chose pin, then the user will receive a PIN code that they will enter into your app to complete the authorization process.
+    fn get_authentication_url(&self, method: Method, state: Option<&str>) -> Result<Url, ClientError> {
         let url = format!(
             "{}?response_type={}&client_id={}{}",
             CLIENT_AUTHORIZATION_URL,
             method.to_url_parameter(),
-            self.settings.client_id.0,
+            self.get_settings().client_id.0,
             match state {
                 Some(v) => format!("&state={}", v),
                 None => "".to_string()
@@ -108,12 +107,13 @@ impl Client {
     }
 
     /// Request client authorization through an authorization code
-    pub async fn authorization_by_authorization_code(&self, code: AuthorizationCode) -> Result<Response<AuthorizationResponse>, ClientError> {
-        let res = self.client
+    async fn authorization_by_authorization_code(&self, code: AuthorizationCode) -> Result<Response<AuthorizationResponse>, ClientError> {
+        let res = self.get_client()
             .post(CLIENT_TOKEN_URL)
+            .headers(self.get_headers()?)
             .form(&[
-                ("client_id", &self.settings.client_id.0),
-                ("client_secret", &self.settings.client_secret.0),
+                ("client_id", &self.get_settings().client_id.0),
+                ("client_secret", &self.get_settings().client_secret.0),
                 ("grant_type", &"authorization_code".to_owned()),
                 ("code", &code.0)])
             .send().await?;
@@ -122,12 +122,13 @@ impl Client {
     }
 
     /// Request client authorization through a pin code
-    pub async fn authorization_by_pin_code(&self, code: PINCode) -> Result<Response<AuthorizationResponse>, ClientError> {
-        let res = self.client
+    async fn authorization_by_pin_code(&self, code: PINCode) -> Result<Response<AuthorizationResponse>, ClientError> {
+        let res = self.get_client()
             .post(CLIENT_TOKEN_URL)
+            .headers(self.get_headers()?)
             .form(&[
-                ("client_id", &self.settings.client_id.0),
-                ("client_secret", &self.settings.client_secret.0),
+                ("client_id", &self.get_settings().client_id.0),
+                ("client_secret", &self.get_settings().client_secret.0),
                 ("grant_type", &"pin".to_owned()),
                 ("pin", &code.0)])
             .send().await?;
@@ -136,15 +137,18 @@ impl Client {
     }
 }
 
-impl AuthenticatedClient {
+/// Registered client authentication API client
+#[async_trait]
+pub trait AuthenticationRegisteredClient: AuthenticationClient + RegisteredClient {
     /// Refresh the client token
-    pub async fn refresh_token(&mut self) -> Result<Response<RefreshResponse>, ClientError> {
-        let res = self.client
+    async fn refresh_token(&self) -> Result<Response<RefreshResponse>, ClientError> {
+        let res = self.get_client()
             .post(CLIENT_TOKEN_URL)
+            .headers(self.get_headers()?)
             .form(&[
-                ("client_id", &self.settings.client_id.0),
-                ("client_secret", &self.settings.client_secret.0),
-                ("refresh_token", &self.authentication.refresh_token.0),
+                ("client_id", &self.get_settings().client_id.to_string()),
+                ("client_secret", &self.get_settings().client_secret.to_string()),
+                ("refresh_token", &self.get_authentication_settings().refresh_token.to_string()),
                 ("grant_type", &"refresh_token".to_string())])
             .send().await?;
 
@@ -156,17 +160,24 @@ impl AuthenticatedClient {
     /// If the authentication token of the client is going to expire within
     /// `REFRESH_TIMEOUT` minutes, a refresh is asked and the token is substituted with
     /// a new one
-    pub async fn with_fresh_tokens(self) -> Result<Self, ClientError> {
-        if self.authentication.expires_in > Utc::now()
+    async fn with_fresh_tokens(self) -> Result<Self, ClientError> {
+        if self.get_authentication_settings().expires_in > Utc::now()
             .checked_add_signed(Duration::minutes(REFRESH_TIMEOUT)).unwrap() {
             Ok(self)
         } else {
             let mut client = self.clone();
-            client.refresh_token().await?;
+            let res = client.refresh_token().await?.content.result()?;
+            client.update_authentication_token(res.access_token, res.expires_in);
             Ok(client)
         }
     }
 }
+
+impl AuthenticationClient for BasicClient {}
+
+impl AuthenticationClient for AuthenticatedClient {}
+
+impl AuthenticationRegisteredClient for AuthenticatedClient {}
 
 #[cfg(test)]
 mod tests {
@@ -174,18 +185,31 @@ mod tests {
 
     use chrono::Utc;
 
-    use crate::api::{
-        authorization::Method,
-        Client,
+    use crate::{
+        api::{
+            client::BasicClient,
+            endpoints::authorization::{
+                AuthenticationClient,
+                AuthenticationRegisteredClient,
+                Method,
+            },
+        },
+        model::authorization::{
+            AccessToken,
+            AuthorizationCode,
+            ClientID,
+            ClientSecret,
+            PINCode,
+            RefreshToken,
+        },
+        traits::FromEnv,
     };
-    use crate::model::authorization::{AccessToken, AuthorizationCode, ClientID, ClientSecret, PINCode, RefreshToken};
-    use crate::traits::FromEnv;
 
     #[test]
     fn test_get_authentication_url_with_authorization_code() -> Result<(), Box<dyn Error>> {
         let client_id = ClientID::from_default_env()?;
         let client_secret = ClientSecret::from_default_env()?;
-        let client = Client::new(client_id, client_secret)?;
+        let client = BasicClient::new(client_id, client_secret)?;
         let res = client.get_authentication_url(Method::AuthorizationCode, None)?;
         println!("{:?}", res);
         Ok(())
@@ -195,7 +219,7 @@ mod tests {
     fn test_get_authentication_url_with_pin_code() -> Result<(), Box<dyn Error>> {
         let client_id = ClientID::from_default_env()?;
         let client_secret = ClientSecret::from_default_env()?;
-        let client = Client::new(client_id, client_secret)?;
+        let client = BasicClient::new(client_id, client_secret)?;
         let res = client.get_authentication_url(Method::Pin, None)?;
         println!("{:?}", res);
         Ok(())
@@ -205,7 +229,7 @@ mod tests {
     fn test_get_authentication_url_with_token() -> Result<(), Box<dyn Error>> {
         let client_id = ClientID::from_default_env()?;
         let client_secret = ClientSecret::from_default_env()?;
-        let client = Client::new(client_id, client_secret)?;
+        let client = BasicClient::new(client_id, client_secret)?;
         let res = client.get_authentication_url(Method::Token, None)?;
         println!("{:?}", res);
         Ok(())
@@ -215,7 +239,7 @@ mod tests {
     fn test_get_authentication_url_with_state() -> Result<(), Box<dyn Error>> {
         let client_id = ClientID::from_default_env()?;
         let client_secret = ClientSecret::from_default_env()?;
-        let client = Client::new(client_id, client_secret)?;
+        let client = BasicClient::new(client_id, client_secret)?;
         let res = client.get_authentication_url(Method::AuthorizationCode, Some("Example state"))?;
         println!("{:?}", res);
         Ok(())
@@ -226,7 +250,7 @@ mod tests {
     async fn test_consume_authorization_code() -> Result<(), Box<dyn Error>> {
         let client_id = ClientID::from_default_env()?;
         let client_secret = ClientSecret::from_default_env()?;
-        let client = Client::new(client_id, client_secret)?;
+        let client = BasicClient::new(client_id, client_secret)?;
         let authorization_code = AuthorizationCode::from_default_env()?;
         let res = client
             .authorization_by_authorization_code(authorization_code).await?;
@@ -239,7 +263,7 @@ mod tests {
     async fn test_consume_pin_code() -> Result<(), Box<dyn Error>> {
         let client_id = ClientID::from_default_env()?;
         let client_secret = ClientSecret::from_default_env()?;
-        let client = Client::new(client_id, client_secret)?;
+        let client = BasicClient::new(client_id, client_secret)?;
         let pin_code = PINCode::from_default_env()?;
         println!("{:?}", pin_code);
         let res = client
@@ -255,7 +279,7 @@ mod tests {
         let client_secret = ClientSecret::from_default_env()?;
         let access_token = AccessToken::from_default_env()?;
         let refresh_token = RefreshToken::from_default_env()?;
-        let mut client = Client::new(client_id, client_secret)?
+        let client = BasicClient::new(client_id, client_secret)?
             .with_tokens(access_token, refresh_token, Utc::now())?;
         let res = client.refresh_token().await?;
         println!("{:?}", res);

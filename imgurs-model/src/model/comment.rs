@@ -3,8 +3,10 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::model::common::{AccountID, AccountUsername};
-use crate::serialization::unix_epoch;
+use crate::{
+    model::common::{AccountID, Username},
+    serialization::unix_epoch,
+};
 
 /// The base model for a comment.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -18,7 +20,7 @@ pub struct Comment {
     /// The comment itself.
     pub comment: String,
     /// Username of the author of the comment
-    pub author: Option<AccountUsername>,
+    pub author: Option<Username>,
     /// The account ID for the author
     pub author_id: AccountID,
     /// If this comment was done to an album
@@ -54,15 +56,10 @@ pub struct Comment {
 mod test {
     use std::error::Error;
 
-    use crate::{
-        api::Client,
-        model::{
-            basic::Basic,
-            comment::Comment,
-        },
+    use crate::model::{
+        basic::Basic,
+        comment::Comment,
     };
-    use crate::model::authorization::{ClientID, ClientSecret};
-    use crate::traits::FromEnv;
 
     #[test]
     fn test_deserialize_comment_local() -> Result<(), Box<dyn Error>> {
@@ -71,22 +68,6 @@ mod test {
         let data = serde_json::from_str::<Basic<Comment>>(res)?;
 
         println!("{:#?}", data);
-
-        Ok(())
-    }
-
-    #[tokio::test]
-    async fn test_deserialize_comment_remote() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::from_default_env()?;
-        let client_secret = ClientSecret::from_default_env()?;
-        let client = Client::new(client_id, client_secret)?;
-
-        let data = client.client
-            .get("https://api.imgur.com/3/comment/1938633683")
-            .send().await?
-            .json::<Basic<Comment>>().await?;
-
-        println!("{:?}", data);
 
         Ok(())
     }

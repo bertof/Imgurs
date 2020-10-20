@@ -78,13 +78,17 @@ pub enum Method {
 mod test {
     use std::error::Error;
 
-    use reqwest::StatusCode;
-
-    use crate::model::{
-        account_settings::AccountSettings,
-        basic::{Basic, Data, Method},
+    use crate::{
+        model::{
+            account_settings::AccountSettings,
+            basic::{
+                Basic,
+                Data,
+                Method,
+                ErrorMessage,
+            },
+        }
     };
-    use crate::model::basic::ErrorMessage;
 
     #[test]
     fn test_error_parsing_local() -> Result<(), Box<dyn Error>> {
@@ -99,26 +103,6 @@ mod test {
         }"#;
 
         let data = serde_json::from_str::<Basic<AccountSettings>>(res)?;
-        assert!(!data.success);
-        assert_eq!(data.status, 401);
-        match data.data {
-            Data::Content(_) => panic!("Should return error"),
-            Data::Error { error, request, method } => {
-                assert_eq!(error, ErrorMessage::new("Authentication required"));
-                assert_eq!(request, "/3/account/me/settings");
-                assert_eq!(method, Method::GET);
-            }
-        }
-
-        Ok(())
-    }
-
-    #[tokio::test]
-    async fn test_error_parsing_remote() -> Result<(), Box<dyn Error>> {
-        let res = reqwest::get("https://api.imgur.com/3/account/me/settings").await?;
-        assert_eq!(res.status(), StatusCode::from_u16(401)?);
-
-        let data = res.json::<Basic<AccountSettings>>().await?;
         assert!(!data.success);
         assert_eq!(data.status, 401);
         match data.data {

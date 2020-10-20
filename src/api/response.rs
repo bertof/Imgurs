@@ -1,6 +1,7 @@
 //! API response implementation
 
-use http::HeaderMap;
+
+use reqwest::header::HeaderMap;
 
 use crate::model::basic::Basic;
 

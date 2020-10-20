@@ -1,14 +1,20 @@
 //! Authentication data
 
 use std::convert::TryFrom;
+use std::fmt;
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::error::ErrorMessage;
-use crate::model::common::{AccountID, AccountUsername};
-use crate::serialization::unix_epoch;
-use crate::traits::FromEnv;
+use crate::{
+    error::ErrorMessage,
+    model::{
+        common::AccountID,
+        common::Username,
+    },
+    serialization::unix_epoch,
+    traits::FromEnv,
+};
 
 /// Client ID
 #[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
@@ -36,6 +42,12 @@ impl FromEnv for ClientID {
     }
 }
 
+impl fmt::Display for ClientID {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 /// Client secret
 #[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -59,6 +71,12 @@ impl TryFrom<String> for ClientSecret {
 impl FromEnv for ClientSecret {
     fn default_env() -> &'static str {
         "CLIENT_SECRET"
+    }
+}
+
+impl fmt::Display for ClientSecret {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 
@@ -93,6 +111,12 @@ impl FromEnv for AccessToken {
     }
 }
 
+impl fmt::Display for AccessToken {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 /// Refresh token
 ///
 /// Is used to request new access_tokens.
@@ -124,6 +148,12 @@ impl FromEnv for RefreshToken {
     }
 }
 
+impl fmt::Display for RefreshToken {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 /// Authorization code
 ///
 /// Is used for obtaining the the access and refresh tokens.
@@ -150,6 +180,12 @@ impl TryFrom<String> for AuthorizationCode {
 impl FromEnv for AuthorizationCode {
     fn default_env() -> &'static str {
         "AUTHORIZATION_CODE"
+    }
+}
+
+impl fmt::Display for AuthorizationCode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 
@@ -183,10 +219,22 @@ impl FromEnv for PINCode {
     }
 }
 
+impl fmt::Display for PINCode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 /// Type of the obtained token
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct TokenType(pub String);
+
+impl fmt::Display for TokenType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
 
 /// Authorization API response
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -197,7 +245,7 @@ pub struct AuthorizationResponse {
     /// Account id
     pub account_id: AccountID,
     /// Account username
-    pub account_username: AccountUsername,
+    pub account_username: Username,
     /// Access token expiration date
     #[serde(with = "unix_epoch")]
     pub expires_in: DateTime<Utc>,
@@ -218,7 +266,7 @@ pub struct RefreshResponse {
     /// Account id
     pub account_id: AccountID,
     /// Account username
-    pub account_username: AccountUsername,
+    pub account_username: Username,
     /// Access token expiration date
     #[serde(with = "unix_epoch")]
     pub expires_in: DateTime<Utc>,

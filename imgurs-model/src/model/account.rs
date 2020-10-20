@@ -4,8 +4,10 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::model::common::{AccountID, ProExpiration};
-use crate::serialization::unix_epoch;
+use crate::{
+    model::common::{AccountID, ProExpiration, Username},
+    serialization::unix_epoch,
+};
 
 /// Basic account information representation.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -15,7 +17,7 @@ pub struct Account {
     /// The account id for the username requested.
     pub id: AccountID,
     /// The account username, will be the same as requested in the URL
-    pub url: String,
+    pub url: Username,
     /// A basic description the user has filled out
     pub bio: Option<String>,
     /// Avatar URL
@@ -41,46 +43,68 @@ pub struct Account {
     pub user_follow: UserFollow,
 }
 
-
 /// User follow status
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[serde(deny_unknown_fields)]
 pub struct UserFollow {
-    status: bool
+    /// Following status
+    pub status: bool
+}
+
+/// User blocked status
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[serde(deny_unknown_fields)]
+pub struct BlockedStatus {
+    /// Blocked status
+    pub blocked: bool
+}
+
+/// List of blocked accounts
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[serde(deny_unknown_fields)]
+pub struct AccountBlocks {
+    /// TODO: Missing from API model
+    pub items: Vec<BlockedAccount>,
+    /// TODO: Missing from API model
+    pub next: Option<serde_json::Value>,
+}
+
+/// Blocked account
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[serde(deny_unknown_fields)]
+pub struct BlockedAccount {
+    /// Account username
+    pub url: Username
+}
+
+/// Create block response
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[serde(deny_unknown_fields)]
+pub struct BlockResponse {
+    /// Blocked status
+    pub blocked: bool
 }
 
 
 #[cfg(test)]
 mod test {
-    use crate::api::Client;
-    use crate::model::account::Account;
-    use crate::model::authorization::{ClientID, ClientSecret};
-    use crate::model::basic::Basic;
-    use crate::traits::FromEnv;
     use std::error::Error;
+
+    use crate::model::{
+        account::Account,
+        basic::Basic,
+    };
 
     #[test]
     fn test_deserialize_account_local() -> Result<(), Box<dyn Error>> {
         let data = r#"{"data":{"id":48437714,"url":"ghostinspector","bio":null,"avatar":"https://imgur.com/user/ghostinspector/avatar?maxwidth=290","avatar_name":"default/G","cover":"https://imgur.com/user/ghostinspector/cover?maxwidth=2560","cover_name":"default/1-space","reputation":-252,"reputation_name":"Neutral","created":1481839668,"pro_expiration":false,"user_follow":{"status":false},"is_blocked":false},"success":true,"status":200}"#;
 
         let account = serde_json::from_str::<Basic<Account>>(data)?;
-
-        println!("{:#?}", account);
-
-        Ok(())
-    }
-
-    #[tokio::test]
-    async fn test_deserialize_account_remote() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::from_default_env()?;
-        let client_secret = ClientSecret::from_default_env()?;
-        let client = Client::new(client_id, client_secret)?;
-
-        let account = client.client
-            .get("https://api.imgur.com/3/account/ghostinspector")
-            .send().await?
-            .json::<Basic<Account>>().await?;
 
         println!("{:#?}", account);
 
