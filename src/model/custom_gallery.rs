@@ -28,7 +28,7 @@ pub struct CustomGallery {
 /// Custom gallery item
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-#[serde(deny_unknown_fields)]
+#[serde(untagged)]
 pub enum CustomGalleryItem {
     /// Gallery image
     GalleryImage(GalleryImage),

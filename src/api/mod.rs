@@ -12,6 +12,7 @@ pub mod endpoints {
 
     pub mod authorization;
     pub mod account;
+    pub mod gallery;
 }
 
 

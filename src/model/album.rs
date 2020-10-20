@@ -8,13 +8,16 @@ use url::Url;
 use crate::model::common::AccountID;
 use crate::serialization::unix_epoch;
 
+/// Album unique identifier
+pub type AlbumID = String;
+
 /// The base model for an album
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[serde(deny_unknown_fields)]
 pub struct Album {
     /// The ID for the album
-    pub id: String,
+    pub id: AlbumID,
     /// The title of the album in the gallery
     pub title: String,
     /// The description of the album in the gallery
@@ -80,10 +83,10 @@ mod test {
     use crate::{
         model::{album::Album, basic::Basic},
     };
-    use crate::model::authorization::{ClientID, ClientSecret};
-    use crate::traits::FromEnv;
     use crate::api::client::BasicClient;
     use crate::api::traits::Client;
+    use crate::model::authorization::{ClientID, ClientSecret};
+    use crate::traits::FromEnv;
 
     #[test]
     fn test_deserialize_album_local() -> Result<(), Box<dyn Error>> {

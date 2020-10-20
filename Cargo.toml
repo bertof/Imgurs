@@ -29,3 +29,12 @@ default = []
 log = ["tracing/log"]
 
 [lib]
+
+[workspace]
+members = [
+    "imgurs-model",
+    "imgurs-client"
+]
+exclude = [
+    ".github"
+]

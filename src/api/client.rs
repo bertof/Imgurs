@@ -156,7 +156,6 @@ impl RegisteredClient for AuthenticatedClient {
 /// Response contents sorting preference
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-#[serde(deny_unknown_fields)]
 pub enum SortPreference {
     /// Newest to oldest
     Newest,

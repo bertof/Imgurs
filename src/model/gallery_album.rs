@@ -3,263 +3,263 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::model::common::AccountID;
-use crate::model::image::Image;
-use crate::serialization::unix_epoch;
+use crate::{
+    model::{
+        common::AccountID,
+        gallery_image::GalleryImage,
+    },
+    serialization::unix_epoch,
+};
 
 /// Gallery album
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-#[serde(deny_unknown_fields)]
+// #[serde(deny_unknown_fields)]
 pub struct GalleryAlbum {
-    /// The ID for the image
-    pub id: String,
-    /// The title of the album in the gallery
-    pub title: String,
-    /// The description of the album in the gallery
-    pub description: Option<String>,
+    /// The account ID of the account that uploaded it, or `null`.
+    pub account_id: Option<AccountID>,
+    /// The account username or `null` if it's anonymous.
+    pub account_url: Option<String>,
+    /// TODO: missing from API model
+    pub ad_config: Option<serde_json::Value>,
+    /// TODO: missing from API model
+    pub ad_type: Option<serde_json::Value>,
+    /// TODO: missing from API model
+    pub ad_url: Option<serde_json::Value>,
+    /// TODO: missing from API model
+    pub comment_count: u64,
+    /// The ID of the album cover image
+    pub cover: String,
+    /// The height, in pixels, of the album cover image
+    pub cover_height: Option<u64>,
+    /// The width, in pixels, of the album cover image
+    pub cover_width: Option<u64>,
     /// Time inserted into the gallery, epoch time
     #[serde(with = "unix_epoch")]
     pub datetime: DateTime<Utc>,
-    /// The ID of the album cover image
-    pub cover: String,
-    /// The width, in pixels, of the album cover image
-    pub cover_width: Option<u64>,
-    /// The height, in pixels, of the album cover image
-    pub cover_height: Option<u64>,
-    /// The account username or `null` if it's anonymous.
-    pub account_url: Option<String>,
-    /// The account ID of the account that uploaded it, or `null`.
-    pub account_id: Option<AccountID>,
-    /// The privacy level of the album, you can only view public if not logged in as album owner
-    pub privacy: String,
-    /// The view layout of the album.
-    pub layout: String,
-    /// The number of image views
-    pub views: u64,
-    /// The URL link to the album
-    pub link: Url,
-    /// Upvotes for the image
-    pub ups: u64,
+    /// The description of the album in the gallery
+    pub description: Option<String>,
     /// Number of downvotes for the image
     pub downs: u64,
-    /// Upvotes minus downvotes
-    pub points: i64,
-    /// Imgur popularity score
-    pub score: i64,
-    /// If it's an album or not
-    pub is_album: bool,
-    /// The current user's vote on the album. `null` if not signed in or if the user hasn't voted on it.
-    pub vote: Option<String>,
     /// Indicates if the current user favorited the album. Defaults to false if not signed in.
     pub favorite: Option<bool>,
+    /// Indicates the number of users that have favorited the album.
+    pub favorite_count: Option<u64>,
+    /// The ID for the image
+    pub id: String,
+    /// An array of all the images in the album (only available when requesting the direct album)
+    pub images: Option<Vec<GalleryImage>>,
+    /// The total number of images in the album
+    pub images_count: u64,
+    /// TODO: missing from API model
+    pub in_gallery: Option<bool>,
+    /// Indicates if the album is in the most viral gallery or not.
+    pub in_most_viral: Option<bool>,
+    /// TODO: missing from API model
+    pub include_album_ads: Option<bool>,
+    /// TODO: missing from API model
+    pub is_ad: Option<bool>,
+    /// If it's an album or not
+    pub is_album: bool,
+    /// The view layout of the album.
+    pub layout: String,
+    /// The URL link to the album
+    pub link: Url,
     /// Indicates if the album has been marked as nsfw or not. Defaults to `null` if information is not available.
     pub nsfw: Option<bool>,
-    /// Number of comments on the gallery album.
-    pub comment_count: u64,
+    /// Upvotes minus downvotes
+    pub points: i64,
+    /// The privacy level of the album, you can only view public if not logged in as album owner
+    pub privacy: String,
+    /// Imgur popularity score
+    pub score: i64,
+    /// TODO: missing from API model
+    pub section: Option<serde_json::Value>,
+    /// TODO: missing from API model
+    pub tags: Option<Vec<String>>,
+    /// The title of the album in the gallery
+    pub title: String,
     /// Topic of the gallery album.
     pub topic: Option<String>,
     /// Topic ID of the gallery album.
     pub topic_id: Option<u64>,
-    /// The total number of images in the album
-    pub images_count: u64,
-    /// An array of all the images in the album (only available when requesting the direct album)
-    pub images: Vec<Image>,
-    /// Indicates if the album is in the most viral gallery or not.
-    pub in_most_viral: Option<bool>,
+    /// Upvotes for the image
+    pub ups: u64,
+    /// The number of image views
+    pub views: u64,
+    /// The current user's vote on the album. `null` if not signed in or if the user hasn't voted on it.
+    pub vote: Option<String>,
 }
 
 #[cfg(test)]
 mod test {
     use std::error::Error;
 
-    use crate::{
-        model::{basic::Basic},
+    use crate::model::{
+        basic::Basic,
+        gallery_album::GalleryAlbum,
     };
-    use crate::model::gallery_album::GalleryAlbum;
 
     #[test]
     fn test_deserialize_gallery_album_local() -> Result<(), Box<dyn Error>> {
         let res = r#"{
-            "data": {
-                "id": "lDRB2",
-                "title": "Imgur Office",
-                "description": null,
-                "datetime": 1357856292,
-                "cover": "24nLu",
-                "account_url": "Alan",
-                "account_id": 4,
-                "privacy": "public",
-                "layout": "blog",
-                "views": 13780,
-                "link": "http://alanbox.imgur.com/a/lDRB2",
-                "ups": 1602,
-                "downs": 14,
-                "points": 1588,
-                "score": 1917,
-                "is_album": true,
-                "vote": null,
-                "comment_count": 10,
-                "images_count": 11,
-                "images": [
-                    {
-                        "id": "24nLu",
-                        "title": null,
-                        "description": null,
-                        "datetime": 1357856352,
-                        "type": "image/jpeg",
-                        "animated": false,
-                        "width": 2592,
-                        "height": 1944,
-                        "size": 855658,
-                        "views": 135772,
-                        "bandwidth": 116174397976,
-                        "link": "https://i.imgur.com/24nLu.jpg"
-                    },
-                    {
-                        "id": "Ziz25",
-                        "title": null,
-                        "description": null,
-                        "datetime": 1357856394,
-                        "type": "image/jpeg",
-                        "animated": false,
-                        "width": 2592,
-                        "height": 1944,
-                        "size": 919391,
-                        "views": 135493,
-                        "bandwidth": 124571044763,
-                        "link": "https://i.imgur.com/Ziz25.jpg"
-                    },
-                    {
-                        "id": "9tzW6",
-                        "title": null,
-                        "description": null,
-                        "datetime": 1357856385,
-                        "type": "image/jpeg",
-                        "animated": false,
-                        "width": 2592,
-                        "height": 1944,
-                        "size": 655028,
-                        "views": 135063,
-                        "bandwidth": 88470046764,
-                        "link": "https://i.imgur.com/9tzW6.jpg"
-                    },
-                    {
-                        "id": "dFg5u",
-                        "title": null,
-                        "description": null,
-                        "datetime": 1357856378,
-                        "type": "image/jpeg",
-                        "animated": false,
-                        "width": 2592,
-                        "height": 1944,
-                        "size": 812738,
-                        "views": 134704,
-                        "bandwidth": 109479059552,
-                        "link": "https://i.imgur.com/dFg5u.jpg"
-                    },
-                    {
-                        "id": "oknLx",
-                        "title": null,
-                        "description": null,
-                        "datetime": 1357856338,
-                        "type": "image/jpeg",
-                        "animated": false,
-                        "width": 1749,
-                        "height": 2332,
-                        "size": 717324,
-                        "views": 32938,
-                        "bandwidth": 23627217912,
-                        "link": "https://i.imgur.com/oknLx.jpg"
-                    },
-                    {
-                        "id": "OL6tC",
-                        "title": null,
-                        "description": null,
-                        "datetime": 1357856321,
-                        "type": "image/jpeg",
-                        "animated": false,
-                        "width": 2592,
-                        "height": 1944,
-                        "size": 1443262,
-                        "views": 32346,
-                        "bandwidth": 46683752652,
-                        "link": "https://i.imgur.com/OL6tC.jpg"
-                    },
-                    {
-                        "id": "cJ9cm",
-                        "title": null,
-                        "description": null,
-                        "datetime": 1357856330,
-                        "type": "image/jpeg",
-                        "animated": false,
-                        "width": 2592,
-                        "height": 1944,
-                        "size": 544702,
-                        "views": 31829,
-                        "bandwidth": 17337319958,
-                        "link": "https://i.imgur.com/cJ9cm.jpg"
-                    },
-                    {
-                        "id": "7BtPN",
-                        "title": null,
-                        "description": null,
-                        "datetime": 1357856369,
-                        "type": "image/jpeg",
-                        "animated": false,
-                        "width": 2592,
-                        "height": 1944,
-                        "size": 844863,
-                        "views": 31257,
-                        "bandwidth": 26407882791,
-                        "link": "https://i.imgur.com/7BtPN.jpg"
-                    },
-                    {
-                        "id": "42ib8",
-                        "title": null,
-                        "description": null,
-                        "datetime": 1357856424,
-                        "type": "image/jpeg",
-                        "animated": false,
-                        "width": 2592,
-                        "height": 1944,
-                        "size": 905073,
-                        "views": 30945,
-                        "bandwidth": 28007483985,
-                        "link": "https://i.imgur.com/42ib8.jpg"
-                    },
-                    {
-                        "id": "BbwIx",
-                        "title": null,
-                        "description": null,
-                        "datetime": 1357856360,
-                        "type": "image/jpeg",
-                        "animated": false,
-                        "width": 1749,
-                        "height": 2332,
-                        "size": 662413,
-                        "views": 30107,
-                        "bandwidth": 19943268191,
-                        "link": "https://i.imgur.com/BbwIx.jpg"
-                    },
-                    {
-                        "id": "x7b91",
-                        "title": null,
-                        "description": null,
-                        "datetime": 1357856406,
-                        "type": "image/jpeg",
-                        "animated": false,
-                        "width": 1944,
-                        "height": 2592,
-                        "size": 618567,
-                        "views": 29259,
-                        "bandwidth": 18098651853,
-                        "link": "https://i.imgur.com/x7b91.jpg"
-                    }
-                ]
+          "data": {
+            "account_id": 67659037,
+            "account_url": "BeanMugged",
+            "ad_config": {
+              "highRiskFlags": [],
+              "safeFlags": [
+                "in_gallery",
+                "gallery",
+                "album"
+              ],
+              "showsAds": false,
+              "unsafeFlags": [
+                "onsfw_mod_unsafe",
+                "sixth_mod_unsafe",
+                "mature"
+              ],
+              "wallUnsafeFlags": []
             },
-            "success": true,
-            "status": 200
+            "ad_type": 0,
+            "ad_url": "",
+            "comment_count": 108,
+            "cover": "MDCEW6Q",
+            "cover_height": 532,
+            "cover_width": 513,
+            "datetime": 1603095538,
+            "description": null,
+            "downs": 54,
+            "favorite": false,
+            "favorite_count": 315,
+            "id": "HvCcoNA",
+            "images": [
+              {
+                "account_id": null,
+                "account_url": null,
+                "ad_type": 0,
+                "ad_url": "",
+                "animated": false,
+                "bandwidth": 8667309096,
+                "comment_count": null,
+                "datetime": 1592569542,
+                "description": null,
+                "downs": null,
+                "edited": "0",
+                "favorite": false,
+                "favorite_count": null,
+                "has_sound": false,
+                "height": 532,
+                "id": "MDCEW6Q",
+                "in_gallery": false,
+                "in_most_viral": false,
+                "is_ad": false,
+                "link": "https://i.imgur.com/MDCEW6Q.png",
+                "nsfw": null,
+                "points": null,
+                "score": null,
+                "section": null,
+                "size": 452412,
+                "tags": [],
+                "title": null,
+                "type": "image/png",
+                "ups": null,
+                "views": 19158,
+                "vote": null,
+                "width": 513
+              },
+              {
+                "account_id": null,
+                "account_url": null,
+                "ad_type": 0,
+                "ad_url": "",
+                "animated": false,
+                "bandwidth": 596525155,
+                "comment_count": null,
+                "datetime": 1592569543,
+                "description": null,
+                "downs": null,
+                "edited": "0",
+                "favorite": false,
+                "favorite_count": null,
+                "has_sound": false,
+                "height": 540,
+                "id": "1REuHNL",
+                "in_gallery": false,
+                "in_most_viral": false,
+                "is_ad": false,
+                "link": "https://i.imgur.com/1REuHNL.jpg",
+                "nsfw": null,
+                "points": null,
+                "score": null,
+                "section": null,
+                "size": 32215,
+                "tags": [],
+                "title": null,
+                "type": "image/jpeg",
+                "ups": null,
+                "views": 18517,
+                "vote": null,
+                "width": 609
+              },
+              {
+                "account_id": null,
+                "account_url": null,
+                "ad_type": 0,
+                "ad_url": "",
+                "animated": false,
+                "bandwidth": 468810123,
+                "comment_count": null,
+                "datetime": 1592569544,
+                "description": null,
+                "downs": null,
+                "edited": "0",
+                "favorite": false,
+                "favorite_count": null,
+                "has_sound": false,
+                "height": 232,
+                "id": "hp2tIwe",
+                "in_gallery": false,
+                "in_most_viral": false,
+                "is_ad": false,
+                "link": "https://i.imgur.com/hp2tIwe.jpg",
+                "nsfw": null,
+                "points": null,
+                "score": null,
+                "section": null,
+                "size": 30201,
+                "tags": [],
+                "title": null,
+                "type": "image/jpeg",
+                "ups": null,
+                "views": 15523,
+                "vote": null,
+                "width": 500
+              }
+            ],
+            "images_count": 50,
+            "in_gallery": true,
+            "in_most_viral": true,
+            "include_album_ads": true,
+            "is_ad": false,
+            "is_album": true,
+            "layout": "blog",
+            "link": "https://imgur.com/a/HvCcoNA",
+            "nsfw": true,
+            "points": 1251,
+            "privacy": "hidden",
+            "score": 1266,
+            "section": "",
+            "tags": [],
+            "title": "Dunn's Dumb Dump",
+            "topic": "No Topic",
+            "topic_id": 29,
+            "ups": 1305,
+            "views": 31958,
+            "vote": null
+          },
+          "status": 200,
+          "success": true
         }"#;
 
         let data = serde_json::from_str::<Basic<GalleryAlbum>>(res)?;
@@ -267,11 +267,5 @@ mod test {
         println!("{:#?}", data);
 
         Ok(())
-    }
-
-    #[ignore]
-    #[tokio::test]
-    async fn test_deserialize_gallery_album_remote() -> Result<(), Box<dyn Error>> {
-        unimplemented!()
     }
 }
