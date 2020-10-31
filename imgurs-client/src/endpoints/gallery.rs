@@ -2,15 +2,22 @@
 
 use async_trait::async_trait;
 
-use imgurs_model::model::album::AlbumID;
-use imgurs_model::model::gallery_album::GalleryAlbum;
-use imgurs_model::model::gallery_image::{GalleryImage, GalleryImageID};
+use imgurs_model::{
+    model::{
+        album::AlbumID,
+        gallery_album::GalleryAlbum,
+        gallery_image::{GalleryImage, GalleryImageID},
+        gallery_tags::GalleryTags,
+    },
+    utilities::pretty_json,
+};
 
-use crate::client::{AuthenticatedClient, BasicClient};
-use crate::error::ClientError;
-use crate::response::Response;
-use crate::traits::{Client, RegisteredClient};
-use crate::utilities::pretty_json;
+use crate::{
+    client::{AuthenticatedClient, BasicClient},
+    error::ClientError,
+    response::Response,
+    traits::{Client, RegisteredClient},
+};
 
 /// Gallery API client
 #[async_trait]
@@ -39,6 +46,31 @@ pub trait GalleryClient: Client {
     async fn get_gallery_image(&self, gallery_image_id: &GalleryImageID) -> Result<Response<GalleryImage>, ClientError> {
         let res = self.get_client()
             .get(&format!("https://api.imgur.com/3/gallery/image/{id}", id = gallery_image_id))
+            .headers(self.get_headers()?)
+            .send().await?;
+
+        let headers = res.headers().clone();
+        println!("{:#?}", headers);
+
+        let text = res.text().await?;
+        println!("{}", text);
+        println!("{}", pretty_json(&text)?);
+
+        let content = serde_json::from_str(&text)?;
+        // let content = res.json().await?;
+
+        Ok(Response {
+            content,
+            headers,
+        })
+    }
+
+    /// Gallery image
+    ///
+    /// Get additional information about an image in the gallery.
+    async fn get_gallery_tags(&self) -> Result<Response<GalleryTags>, ClientError> {
+        let res = self.get_client()
+            .get("https://api.imgur.com/3/tags")
             .headers(self.get_headers()?)
             .send().await?;
 

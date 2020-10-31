@@ -8,6 +8,7 @@ pub mod custom_gallery;
 pub mod gallery_album;
 pub mod gallery_image;
 pub mod gallery_profile;
+pub mod gallery_tags;
 
 pub mod image;
 
