@@ -1,18 +1,18 @@
 //! Custom Serde serialization and deserialization implementations
 
 /// Unix epoch serialization and deserialization
-pub(crate) mod unix_epoch {
+pub mod unix_epoch {
     use chrono::{DateTime, TimeZone, Utc};
     use serde::{self, Deserialize, Deserializer, Serializer};
 
     const FORMAT: &str = "%s";
 
-    pub(crate) fn serialize<S>(date: &DateTime<Utc>, serializer: S) -> Result<S::Ok, S::Error>
+    pub fn serialize<S>(date: &DateTime<Utc>, serializer: S) -> Result<S::Ok, S::Error>
         where S: Serializer {
         serializer.serialize_i64(date.timestamp())
     }
 
-    pub(crate) fn deserialize<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
         where D: Deserializer<'de> {
         let v = i64::deserialize(deserializer)?;
         Utc.datetime_from_str(&format!("{}", v), FORMAT)

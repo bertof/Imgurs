@@ -1,9 +1,7 @@
 //! API response implementation
-
-
 use reqwest::header::HeaderMap;
 
-use crate::model::basic::Basic;
+use imgurs_model::model::basic::Basic;
 
 /// API response container
 #[derive(Clone, Debug, PartialEq)]

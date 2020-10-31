@@ -1,13 +1,10 @@
 //! API error implementation
 
-use std::{
-    error::Error,
-    fmt,
-};
+use std::{error::Error, fmt};
 
 use reqwest::header::{InvalidHeaderName, InvalidHeaderValue, ToStrError};
 
-use crate::error::ErrorMessage;
+use imgurs_model::error::ErrorMessage;
 
 /// Client error wrapper
 #[derive(Debug)]
