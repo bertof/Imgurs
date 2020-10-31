@@ -56,7 +56,8 @@ mod test {
 
     #[test]
     fn test_deserialize_gallery_profile_local() -> Result<(), Box<dyn Error>> {
-        let res = r#"{
+        let res = {
+            r#"{
             "data": {
                 "total_gallery_comments": 40,
                 "total_gallery_likes": 23,
@@ -76,7 +77,8 @@ mod test {
             },
             "success": true,
             "status": 200
-        }"#;
+        }"#
+        };
 
         let data = serde_json::from_str::<Basic<GalleryProfile>>(res)?;
 
