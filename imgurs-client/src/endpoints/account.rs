@@ -3,27 +3,18 @@
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
+use imgurs_model::model::{
+    account::{Account, AccountBlocks, BlockedStatus},
+    basic::{Basic, Data},
+    common::Username,
+    custom_gallery::CustomGalleryItem,
+};
+
 use crate::{
-    api::{
-        client::{
-            AuthenticatedClient,
-            BasicClient,
-            SortPreference,
-        },
-        error::ClientError,
-        response::Response,
-        traits::{Client, RegisteredClient},
-    },
-    model::{
-        account::{
-            Account,
-            AccountBlocks,
-            BlockedStatus,
-        },
-        basic::{Basic, Data},
-        common::Username,
-        custom_gallery::CustomGalleryItem,
-    },
+    client::{AuthenticatedClient, BasicClient, SortPreference},
+    error::ClientError,
+    response::Response,
+    traits::{Client, RegisteredClient},
 };
 
 /// Account API client
@@ -258,20 +249,17 @@ mod tests {
 
     use chrono::Utc;
 
-    use crate::{
-        api::{
-            client::BasicClient,
-            endpoints::{
-                account::{AccountClient, AccountRegisteredClient},
-                authorization::AuthenticationRegisteredClient,
-            },
-        },
-        model::authorization::{
-            AccessToken, ClientID,
-            ClientSecret, RefreshToken,
-        },
-        traits::FromEnv,
+    use imgurs_model::{
+        model::authorization::{AccessToken, ClientID, ClientSecret, RefreshToken},
+        traits::from_env::FromEnv,
     };
+
+    use crate::{
+        client::BasicClient,
+        endpoints::account::AccountClient,
+    };
+    use crate::endpoints::authorization::AuthenticationRegisteredClient;
+    use crate::endpoints::account::AccountRegisteredClient;
 
     #[tokio::test]
     async fn test_get_account_by_username() -> Result<(), Box<dyn Error>> {
@@ -279,12 +267,12 @@ mod tests {
         let client_secret = ClientSecret::from_default_env()?;
         let client = BasicClient::new(client_id, client_secret)?;
         let res = client
-            .get_account_by_username(&"bertof".to_string()).await?
+            .get_account_by_username("bertof".into()).await?
             .content.result()?;
 
         println!("{:#?}", res);
-        assert_eq!(&res.url, "bertof");
-        assert_eq!(res.id, 57420253);
+        assert_eq!(&res.url.to_string(), "bertof");
+        assert_eq!(res.id.to_string(), "57420253");
 
         Ok(())
     }
@@ -309,7 +297,7 @@ mod tests {
         let client_secret = ClientSecret::from_default_env()?;
         let client = BasicClient::new(client_id, client_secret)?;
         let res = client
-            .get_account_block_status(&"bertof".to_string()).await?;
+            .get_account_block_status(&"bertof".into()).await?;
 
         println!("{:#?}", res);
 
@@ -318,7 +306,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_blocks() -> Result<(), Box<dyn Error>> {
-        // // Sorry RansackThaElder, needed a test user ☺
+        // Sorry RansackThaElder, needed a test user ☺
         // let target_user = "RansackThaElder".to_string();
 
         let client_id = ClientID::from_default_env()?;

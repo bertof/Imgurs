@@ -196,7 +196,7 @@ mod tests {
             basic::{Basic, Data, Method},
             comment::Comment,
         },
-        traits::FromEnv,
+        traits::from_env::FromEnv,
     };
 
     use crate::{client::BasicClient, traits::Client};

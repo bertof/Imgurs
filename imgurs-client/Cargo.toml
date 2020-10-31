@@ -25,6 +25,7 @@ url = { version = "^2", features = ["serde"] }
 
 [dev-dependencies]
 tokio = { version = "^0.2", features = ["rt-threaded", "macros"] }
+imgurs-model = { path = "../imgurs-model", features = ["from_env"] }
 
 [features]
 default = []

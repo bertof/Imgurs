@@ -33,6 +33,12 @@ impl From<u64> for AccountID {
     }
 }
 
+impl Into<u64> for AccountID {
+    fn into(self) -> u64 {
+        self.0
+    }
+}
+
 impl fmt::Display for AccountID {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.0.fmt(f)

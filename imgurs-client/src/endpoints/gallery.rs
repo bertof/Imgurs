@@ -2,20 +2,15 @@
 
 use async_trait::async_trait;
 
-use crate::{
-    api::{
-        client::{AuthenticatedClient, BasicClient},
-        error::ClientError,
-        response::Response,
-        traits::{Client, RegisteredClient},
-    },
-    model::{
-        album::AlbumID,
-        gallery_album::GalleryAlbum,
-        gallery_image::{GalleryImage, GalleryImageID},
-    },
-    serialization::pretty_json,
-};
+use imgurs_model::model::album::AlbumID;
+use imgurs_model::model::gallery_album::GalleryAlbum;
+use imgurs_model::model::gallery_image::{GalleryImage, GalleryImageID};
+
+use crate::client::{AuthenticatedClient, BasicClient};
+use crate::error::ClientError;
+use crate::response::Response;
+use crate::traits::{Client, RegisteredClient};
+use crate::utilities::pretty_json;
 
 /// Gallery API client
 #[async_trait]
@@ -78,13 +73,14 @@ impl GalleryRegisteredClient for AuthenticatedClient {}
 mod tests {
     use std::error::Error;
 
-    use crate::{
-        api::{
-            client::BasicClient,
-            endpoints::gallery::GalleryClient,
-        },
+    use imgurs_model::{
         model::authorization::{ClientID, ClientSecret},
-        traits::FromEnv,
+        traits::from_env::FromEnv,
+    };
+
+    use crate::{
+        client::BasicClient,
+        endpoints::gallery::GalleryClient,
     };
 
     #[tokio::test]
@@ -94,7 +90,7 @@ mod tests {
         let client = BasicClient::new(client_id, client_secret)?;
 
         let res = client
-            .get_gallery_album(&"HvCcoNA".to_string()).await?
+            .get_gallery_album(&"HvCcoNA".into()).await?
             .content.result()?;
 
         println!("{:#?}", res);
@@ -111,7 +107,7 @@ mod tests {
         let client = BasicClient::new(client_id, client_secret)?;
 
         let res = client
-            .get_gallery_image(&"MDCEW6Q".to_string()).await?
+            .get_gallery_image(&"MDCEW6Q".into()).await?
             .content.result()?;
 
         println!("{:#?}", res);
