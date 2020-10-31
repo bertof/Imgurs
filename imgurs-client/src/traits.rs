@@ -1,16 +1,12 @@
 //! API common traits
 use chrono::{DateTime, Utc};
-use reqwest::{
-    Client as ReqwestClient,
-    header::HeaderMap,
-};
+use reqwest::{Client as ReqwestClient, header::HeaderMap};
+
+use imgurs_model::model::authorization::AccessToken;
 
 use crate::{
-    api::{
-        client::{AuthenticationSettings, ClientSettings},
-        error::ClientError,
-    },
-    model::authorization::AccessToken,
+    client::{AuthenticationSettings, ClientSettings},
+    error::ClientError,
 };
 
 /// Generic client trait

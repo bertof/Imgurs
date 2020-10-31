@@ -13,8 +13,9 @@ use crate::{
         common::Username,
     },
     serialization::unix_epoch,
-    traits::FromEnv,
 };
+#[cfg(feature = "from_env")]
+use crate::traits::from_env::FromEnv;
 
 /// Client ID
 #[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
@@ -36,6 +37,7 @@ impl TryFrom<String> for ClientID {
     }
 }
 
+#[cfg(feature = "from_env")]
 impl FromEnv for ClientID {
     fn default_env() -> &'static str {
         "CLIENT_ID"
@@ -68,6 +70,7 @@ impl TryFrom<String> for ClientSecret {
     }
 }
 
+#[cfg(feature = "from_env")]
 impl FromEnv for ClientSecret {
     fn default_env() -> &'static str {
         "CLIENT_SECRET"
@@ -105,6 +108,7 @@ impl TryFrom<String> for AccessToken {
     }
 }
 
+#[cfg(feature = "from_env")]
 impl FromEnv for AccessToken {
     fn default_env() -> &'static str {
         "ACCESS_TOKEN"
@@ -142,6 +146,7 @@ impl TryFrom<String> for RefreshToken {
     }
 }
 
+#[cfg(feature = "from_env")]
 impl FromEnv for RefreshToken {
     fn default_env() -> &'static str {
         "REFRESH_TOKEN"
@@ -177,6 +182,7 @@ impl TryFrom<String> for AuthorizationCode {
     }
 }
 
+#[cfg(feature = "from_env")]
 impl FromEnv for AuthorizationCode {
     fn default_env() -> &'static str {
         "AUTHORIZATION_CODE"
@@ -213,6 +219,7 @@ impl TryFrom<String> for PINCode {
     }
 }
 
+#[cfg(feature = "from_env")]
 impl FromEnv for PINCode {
     fn default_env() -> &'static str {
         "PIN_CODE"

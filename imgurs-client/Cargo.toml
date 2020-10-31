@@ -12,6 +12,8 @@ description = "Client for a typed and safe interface to the Imgur API"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+imgurs-model = { path = "../imgurs-model" }
+
 async-trait = "0.1.41"
 chrono = { version = "^0.4", features = ["serde"] }
 #http = "^0.2"
@@ -23,6 +25,7 @@ url = { version = "^2", features = ["serde"] }
 
 [dev-dependencies]
 tokio = { version = "^0.2", features = ["rt-threaded", "macros"] }
+imgurs-model = { path = "../imgurs-model", features = ["from_env"] }
 
 [features]
 default = []

@@ -6,15 +6,15 @@ use serde::de::DeserializeOwned;
 use tracing::debug;
 use url::Url;
 
+use imgurs_model::model::authorization::{AuthorizationCode, AuthorizationResponse, PINCode, RefreshResponse};
+use imgurs_model::model::basic::{Basic, Data};
+
 use crate::{
-    api::{client::AuthenticatedClient, error::ClientError, response::Response},
-    model::{
-        authorization::{AuthorizationCode, AuthorizationResponse, PINCode, RefreshResponse},
-        basic::{Basic, Data},
-    },
+    client::{AuthenticatedClient, BasicClient},
+    error::ClientError,
+    response::Response,
+    traits::{Client, RegisteredClient}
 };
-use crate::api::client::BasicClient;
-use crate::api::traits::{Client, RegisteredClient};
 
 /// Client authorization API endpoint
 pub const CLIENT_AUTHORIZATION_URL: &str = "https://api.imgur.com/oauth2/authorize";
@@ -185,25 +185,11 @@ mod tests {
 
     use chrono::Utc;
 
-    use crate::{
-        api::{
-            client::BasicClient,
-            endpoints::authorization::{
-                AuthenticationClient,
-                AuthenticationRegisteredClient,
-                Method,
-            },
-        },
-        model::authorization::{
-            AccessToken,
-            AuthorizationCode,
-            ClientID,
-            ClientSecret,
-            PINCode,
-            RefreshToken,
-        },
-        traits::FromEnv,
-    };
+    use imgurs_model::model::authorization::{AccessToken, AuthorizationCode, ClientID, ClientSecret, PINCode, RefreshToken};
+    use imgurs_model::traits::from_env::FromEnv;
+
+    use crate::client::BasicClient;
+    use crate::endpoints::authorization::{AuthenticationClient, AuthenticationRegisteredClient, Method};
 
     #[test]
     fn test_get_authentication_url_with_authorization_code() -> Result<(), Box<dyn Error>> {
