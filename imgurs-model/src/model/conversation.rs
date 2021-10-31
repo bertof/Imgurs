@@ -45,9 +45,7 @@ pub struct ConversationEntry {
 mod test {
     use std::error::Error;
 
-    use crate::{
-        model::{basic::Basic},
-    };
+    use crate::model::basic::Basic;
     use crate::model::conversation::Conversation;
 
     #[test]

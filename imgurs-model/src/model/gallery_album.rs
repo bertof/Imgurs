@@ -4,10 +4,7 @@ use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::{
-    model::{
-        common::AccountID,
-        gallery_image::GalleryImage,
-    },
+    model::{common::AccountID, gallery_image::GalleryImage},
     serialization::unix_epoch,
 };
 
@@ -95,10 +92,7 @@ pub struct GalleryAlbum {
 mod test {
     use std::error::Error;
 
-    use crate::model::{
-        basic::Basic,
-        gallery_album::GalleryAlbum,
-    };
+    use crate::model::{basic::Basic, gallery_album::GalleryAlbum};
 
     #[test]
     fn test_deserialize_gallery_album_local() -> Result<(), Box<dyn Error>> {

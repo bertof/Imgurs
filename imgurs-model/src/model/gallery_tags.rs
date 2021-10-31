@@ -4195,8 +4195,7 @@ pub mod tests {
 }"#
         };
         println!("{}", pretty_json(response)?);
-        let gallery_tags =
-            serde_json::from_str::<Basic<GalleryTags>>(response);
+        let gallery_tags = serde_json::from_str::<Basic<GalleryTags>>(response);
         println!("{:#?}", gallery_tags);
         Ok(())
     }

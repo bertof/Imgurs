@@ -7,16 +7,16 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use url::Url;
 
-use crate::{
-    model::common::AccountID,
-    serialization::unix_epoch,
-};
+use crate::{model::common::AccountID, serialization::unix_epoch};
 
 /// Album unique identifier
 #[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
 pub struct AlbumID(String);
 
-impl<U> From<U> for AlbumID where U: Into<String> {
+impl<U> From<U> for AlbumID
+where
+    U: Into<String>,
+{
     fn from(v: U) -> Self {
         AlbumID(v.into())
     }
@@ -97,10 +97,7 @@ pub struct Album {
 mod test {
     use std::error::Error;
 
-    use crate::model::{
-        album::Album,
-        basic::Basic,
-    };
+    use crate::model::{album::Album, basic::Basic};
 
     #[test]
     fn test_deserialize_album_local() -> Result<(), Box<dyn Error>> {

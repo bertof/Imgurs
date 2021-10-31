@@ -75,8 +75,7 @@ mod test {
             "status": 200
         }"#;
 
-        let account_settings =
-            serde_json::from_str::<Basic<AccountSettings>>(data)?;
+        let account_settings = serde_json::from_str::<Basic<AccountSettings>>(data)?;
 
         println!("{:#?}", account_settings);
 

@@ -18,9 +18,9 @@ pub struct Basic<T> {
     pub status: u16,
 }
 
-impl<T> Into<Result<T, ErrorMessage>> for Basic<T> {
-    fn into(self) -> Result<T, ErrorMessage> {
-        self.data.into()
+impl<T> From<Basic<T>> for Result<T, ErrorMessage> {
+    fn from(b: Basic<T>) -> Self {
+        b.data.into()
     }
 }
 
@@ -50,11 +50,15 @@ pub enum Data<T> {
     },
 }
 
-impl<T> Into<Result<T, ErrorMessage>> for Data<T> {
-    fn into(self) -> Result<T, ErrorMessage> {
-        match self {
-            Data::Content(v) => Ok(v),
-            Data::Error { error, request: _, method: _ } => Err(error),
+impl<T> From<Data<T>> for Result<T, ErrorMessage> {
+    fn from(d: Data<T>) -> Self {
+        match d {
+            Data::Content(c) => Ok(c),
+            Data::Error {
+                error,
+                request: _,
+                method: _,
+            } => Err(error),
         }
     }
 }
@@ -78,16 +82,9 @@ pub enum Method {
 mod test {
     use std::error::Error;
 
-    use crate::{
-        model::{
-            account_settings::AccountSettings,
-            basic::{
-                Basic,
-                Data,
-                Method,
-                ErrorMessage,
-            },
-        }
+    use crate::model::{
+        account_settings::AccountSettings,
+        basic::{Basic, Data, ErrorMessage, Method},
     };
 
     #[test]
@@ -107,7 +104,11 @@ mod test {
         assert_eq!(data.status, 401);
         match data.data {
             Data::Content(_) => panic!("Should return error"),
-            Data::Error { error, request, method } => {
+            Data::Error {
+                error,
+                request,
+                method,
+            } => {
                 assert_eq!(error, ErrorMessage::new("Authentication required"));
                 assert_eq!(request, "/3/account/me/settings");
                 assert_eq!(method, Method::GET);

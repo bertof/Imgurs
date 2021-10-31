@@ -25,29 +25,42 @@ pub trait GalleryClient: Client {
     /// Gallery album
     ///
     /// Get additional information about an album in the gallery.
-    async fn get_gallery_album(&self, album_id: &AlbumID) -> Result<Response<GalleryAlbum>, ClientError> {
-        let res = self.get_client()
-            .get(&format!("https://api.imgur.com/3/gallery/album/{}", album_id))
+    async fn get_gallery_album(
+        &self,
+        album_id: &AlbumID,
+    ) -> Result<Response<GalleryAlbum>, ClientError> {
+        let res = self
+            .get_client()
+            .get(&format!(
+                "https://api.imgur.com/3/gallery/album/{}",
+                album_id
+            ))
             .headers(self.get_headers()?)
-            .send().await?;
+            .send()
+            .await?;
 
         let headers = res.headers().clone();
         let content = res.json().await?;
 
-        Ok(Response {
-            content,
-            headers,
-        })
+        Ok(Response { content, headers })
     }
 
     /// Gallery image
     ///
     /// Get additional information about an image in the gallery.
-    async fn get_gallery_image(&self, gallery_image_id: &GalleryImageID) -> Result<Response<GalleryImage>, ClientError> {
-        let res = self.get_client()
-            .get(&format!("https://api.imgur.com/3/gallery/image/{id}", id = gallery_image_id))
+    async fn get_gallery_image(
+        &self,
+        gallery_image_id: &GalleryImageID,
+    ) -> Result<Response<GalleryImage>, ClientError> {
+        let res = self
+            .get_client()
+            .get(&format!(
+                "https://api.imgur.com/3/gallery/image/{id}",
+                id = gallery_image_id
+            ))
             .headers(self.get_headers()?)
-            .send().await?;
+            .send()
+            .await?;
 
         let headers = res.headers().clone();
         println!("{:#?}", headers);
@@ -59,20 +72,19 @@ pub trait GalleryClient: Client {
         let content = serde_json::from_str(&text)?;
         // let content = res.json().await?;
 
-        Ok(Response {
-            content,
-            headers,
-        })
+        Ok(Response { content, headers })
     }
 
     /// Gallery image
     ///
     /// Get additional information about an image in the gallery.
     async fn get_gallery_tags(&self) -> Result<Response<GalleryTags>, ClientError> {
-        let res = self.get_client()
+        let res = self
+            .get_client()
             .get("https://api.imgur.com/3/tags")
             .headers(self.get_headers()?)
-            .send().await?;
+            .send()
+            .await?;
 
         let headers = res.headers().clone();
         println!("{:#?}", headers);
@@ -84,10 +96,7 @@ pub trait GalleryClient: Client {
         let content = serde_json::from_str(&text)?;
         // let content = res.json().await?;
 
-        Ok(Response {
-            content,
-            headers,
-        })
+        Ok(Response { content, headers })
     }
 }
 
@@ -110,10 +119,7 @@ mod tests {
         traits::from_env::FromEnv,
     };
 
-    use crate::{
-        client::BasicClient,
-        endpoints::gallery::GalleryClient,
-    };
+    use crate::{client::BasicClient, endpoints::gallery::GalleryClient};
 
     #[tokio::test]
     async fn test_deserialize_gallery_album_remote() -> Result<(), Box<dyn Error>> {
@@ -122,8 +128,10 @@ mod tests {
         let client = BasicClient::new(client_id, client_secret)?;
 
         let res = client
-            .get_gallery_album(&"HvCcoNA".into()).await?
-            .content.result()?;
+            .get_gallery_album(&"HvCcoNA".into())
+            .await?
+            .content
+            .result()?;
 
         println!("{:#?}", res);
 
@@ -139,8 +147,10 @@ mod tests {
         let client = BasicClient::new(client_id, client_secret)?;
 
         let res = client
-            .get_gallery_image(&"MDCEW6Q".into()).await?
-            .content.result()?;
+            .get_gallery_image(&"MDCEW6Q".into())
+            .await?
+            .content
+            .result()?;
 
         println!("{:#?}", res);
 

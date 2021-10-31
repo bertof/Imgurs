@@ -49,7 +49,7 @@ pub struct Account {
 #[serde(deny_unknown_fields)]
 pub struct UserFollow {
     /// Following status
-    pub status: bool
+    pub status: bool,
 }
 
 /// User blocked status
@@ -58,7 +58,7 @@ pub struct UserFollow {
 #[serde(deny_unknown_fields)]
 pub struct BlockedStatus {
     /// Blocked status
-    pub blocked: bool
+    pub blocked: bool,
 }
 
 /// List of blocked accounts
@@ -78,7 +78,7 @@ pub struct AccountBlocks {
 #[serde(deny_unknown_fields)]
 pub struct BlockedAccount {
     /// Account username
-    pub url: Username
+    pub url: Username,
 }
 
 /// Create block response
@@ -87,18 +87,14 @@ pub struct BlockedAccount {
 #[serde(deny_unknown_fields)]
 pub struct BlockResponse {
     /// Blocked status
-    pub blocked: bool
+    pub blocked: bool,
 }
-
 
 #[cfg(test)]
 mod test {
     use std::error::Error;
 
-    use crate::model::{
-        account::Account,
-        basic::Basic,
-    };
+    use crate::model::{account::Account, basic::Basic};
 
     #[test]
     fn test_deserialize_account_local() -> Result<(), Box<dyn Error>> {

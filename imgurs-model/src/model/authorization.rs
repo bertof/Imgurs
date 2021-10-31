@@ -6,16 +6,13 @@ use std::fmt;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    error::ErrorMessage,
-    model::{
-        common::AccountID,
-        common::Username,
-    },
-    serialization::unix_epoch,
-};
 #[cfg(feature = "from_env")]
 use crate::traits::from_env::FromEnv;
+use crate::{
+    error::ErrorMessage,
+    model::{common::AccountID, common::Username},
+    serialization::unix_epoch,
+};
 
 /// Client ID
 #[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
@@ -26,7 +23,6 @@ impl TryFrom<String> for ClientID {
     type Error = ErrorMessage;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
-
         // TODO: input checks
 
         if value.is_empty() {
@@ -59,7 +55,6 @@ impl TryFrom<String> for ClientSecret {
     type Error = ErrorMessage;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
-
         // TODO: input checks
 
         if value.is_empty() {
@@ -97,7 +92,6 @@ impl TryFrom<String> for AccessToken {
     type Error = ErrorMessage;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
-
         // TODO: input checks
 
         if value.is_empty() {
@@ -135,7 +129,6 @@ impl TryFrom<String> for RefreshToken {
     type Error = ErrorMessage;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
-
         // TODO: input checks
 
         if value.is_empty() {
@@ -171,7 +164,6 @@ impl TryFrom<String> for AuthorizationCode {
     type Error = ErrorMessage;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
-
         // TODO: input checks
 
         if value.is_empty() {
@@ -208,7 +200,6 @@ impl TryFrom<String> for PINCode {
     type Error = ErrorMessage;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
-
         // TODO: input checks
 
         if value.is_empty() {
@@ -284,4 +275,3 @@ pub struct RefreshResponse {
     /// Type of the token received
     pub token_type: TokenType,
 }
-
