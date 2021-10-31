@@ -3,6 +3,7 @@
 pkgs.mkShell {
   buildInputs = with pkgs; [
     cargo
+    cargo-audit
     clippy
     gccStdenv
     openssl.dev
