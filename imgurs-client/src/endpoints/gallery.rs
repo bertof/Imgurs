@@ -117,8 +117,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_deserialize_gallery_album_remote() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::from_default_env()?;
-        let client_secret = ClientSecret::from_default_env()?;
+        let client_id = ClientID::from_default_env()??;
+        let client_secret = ClientSecret::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?;
 
         let res = client
@@ -134,8 +134,8 @@ mod tests {
     #[ignore]
     #[tokio::test]
     async fn test_deserialize_gallery_image_remote() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::from_default_env()?;
-        let client_secret = ClientSecret::from_default_env()?;
+        let client_id = ClientID::from_default_env()??;
+        let client_secret = ClientSecret::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?;
 
         let res = client

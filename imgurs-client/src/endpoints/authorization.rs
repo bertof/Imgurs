@@ -193,8 +193,8 @@ mod tests {
 
     #[test]
     fn test_get_authentication_url_with_authorization_code() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::from_default_env()?;
-        let client_secret = ClientSecret::from_default_env()?;
+        let client_id = ClientID::from_default_env()??;
+        let client_secret = ClientSecret::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?;
         let res = client.get_authentication_url(Method::AuthorizationCode, None)?;
         println!("{:?}", res);
@@ -203,8 +203,8 @@ mod tests {
 
     #[test]
     fn test_get_authentication_url_with_pin_code() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::from_default_env()?;
-        let client_secret = ClientSecret::from_default_env()?;
+        let client_id = ClientID::from_default_env()??;
+        let client_secret = ClientSecret::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?;
         let res = client.get_authentication_url(Method::Pin, None)?;
         println!("{:?}", res);
@@ -213,8 +213,8 @@ mod tests {
 
     #[test]
     fn test_get_authentication_url_with_token() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::from_default_env()?;
-        let client_secret = ClientSecret::from_default_env()?;
+        let client_id = ClientID::from_default_env()??;
+        let client_secret = ClientSecret::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?;
         let res = client.get_authentication_url(Method::Token, None)?;
         println!("{:?}", res);
@@ -223,8 +223,8 @@ mod tests {
 
     #[test]
     fn test_get_authentication_url_with_state() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::from_default_env()?;
-        let client_secret = ClientSecret::from_default_env()?;
+        let client_id = ClientID::from_default_env()??;
+        let client_secret = ClientSecret::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?;
         let res = client.get_authentication_url(Method::AuthorizationCode, Some("Example state"))?;
         println!("{:?}", res);
@@ -234,10 +234,10 @@ mod tests {
     #[ignore]
     #[tokio::test]
     async fn test_consume_authorization_code() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::from_default_env()?;
-        let client_secret = ClientSecret::from_default_env()?;
+        let client_id = ClientID::from_default_env()??;
+        let client_secret = ClientSecret::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?;
-        let authorization_code = AuthorizationCode::from_default_env()?;
+        let authorization_code = AuthorizationCode::from_default_env()??;
         let res = client
             .authorization_by_authorization_code(authorization_code).await?;
         println!("{:?}", res);
@@ -247,10 +247,10 @@ mod tests {
     #[ignore]
     #[tokio::test]
     async fn test_consume_pin_code() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::from_default_env()?;
-        let client_secret = ClientSecret::from_default_env()?;
+        let client_id = ClientID::from_default_env()??;
+        let client_secret = ClientSecret::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?;
-        let pin_code = PINCode::from_default_env()?;
+        let pin_code = PINCode::from_default_env()??;
         println!("{:?}", pin_code);
         let res = client
             .authorization_by_pin_code(pin_code).await?;
@@ -261,10 +261,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_refresh_token() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::from_default_env()?;
-        let client_secret = ClientSecret::from_default_env()?;
-        let access_token = AccessToken::from_default_env()?;
-        let refresh_token = RefreshToken::from_default_env()?;
+        let client_id = ClientID::from_default_env()??;
+        let client_secret = ClientSecret::from_default_env()??;
+        let access_token = AccessToken::from_default_env()??;
+        let refresh_token = RefreshToken::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?
             .with_tokens(access_token, refresh_token, Utc::now())?;
         let res = client.refresh_token().await?;
