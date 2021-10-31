@@ -203,8 +203,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_deserialize_account_remote() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::from_default_env()?;
-        let client_secret = ClientSecret::from_default_env()?;
+        let client_id = ClientID::from_default_env()??;
+        let client_secret = ClientSecret::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?;
 
         let account = client.get_client()
@@ -219,8 +219,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_deserialize_album_remote() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::from_default_env()?;
-        let client_secret = ClientSecret::from_default_env()?;
+        let client_id = ClientID::from_default_env()??;
+        let client_secret = ClientSecret::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?;
 
         let data = client.get_client()
@@ -235,8 +235,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_deserialize_comment_remote() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::from_default_env()?;
-        let client_secret = ClientSecret::from_default_env()?;
+        let client_id = ClientID::from_default_env()??;
+        let client_secret = ClientSecret::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?;
 
         let data = client.get_client()

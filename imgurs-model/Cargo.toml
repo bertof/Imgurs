@@ -11,6 +11,7 @@ description = "A typed and safe model of the Imgur API"
 
 [dependencies]
 chrono = { version = "0.4", features = ["serde"] }
+dotenv = "0.15"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 url = { version = "2", features = ["serde"] }
