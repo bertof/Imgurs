@@ -2,9 +2,8 @@ use std::{error::Error, fmt, str::FromStr};
 
 use chrono::{DateTime, Utc};
 use reqwest::{
-    Client as ReqwestClient,
-    ClientBuilder as ReqwestClientBuilder,
     header::{HeaderMap, HeaderName, HeaderValue},
+    Client as ReqwestClient, ClientBuilder as ReqwestClientBuilder,
 };
 use serde::{Deserialize, Serialize};
 
@@ -52,10 +51,15 @@ impl BasicClient {
     /// `Client` constructor
     pub fn new(client_id: ClientID, client_secret: ClientSecret) -> Result<Self, Box<dyn Error>> {
         let client = ReqwestClientBuilder::new()
-            .default_headers(vec![
-                (HeaderName::from_str("Authorization")?,
-                 HeaderValue::from_str(&format!("Client-ID {}", client_id.0))?),
-            ].iter().cloned().collect())
+            .default_headers(
+                vec![(
+                    HeaderName::from_str("Authorization")?,
+                    HeaderValue::from_str(&format!("Client-ID {}", client_id.0))?,
+                )]
+                .iter()
+                .cloned()
+                .collect(),
+            )
             .build()?;
 
         // TODO: input checks
@@ -65,16 +69,19 @@ impl BasicClient {
             client_secret,
         };
 
-        Ok(BasicClient {
-            client,
-            settings,
-        })
+        Ok(BasicClient { client, settings })
     }
 
     /// `AuthenticatedClient` constructor from a `Client`
-    pub fn with_tokens<C>(self, access_token: AccessToken, refresh_token: RefreshToken, expires_in: C) -> Result<AuthenticatedClient, Box<dyn Error>>
-        where C: Into<DateTime<Utc>> {
-
+    pub fn with_tokens<C>(
+        self,
+        access_token: AccessToken,
+        refresh_token: RefreshToken,
+        expires_in: C,
+    ) -> Result<AuthenticatedClient, Box<dyn Error>>
+    where
+        C: Into<DateTime<Utc>>,
+    {
         // TODO: input checks
 
         let authentication = AuthenticationSettings {
@@ -93,11 +100,19 @@ impl BasicClient {
 
 impl Client for BasicClient {
     fn get_headers(&self) -> Result<HeaderMap, ClientError> {
-        Ok([(HeaderName::from_str("Authorization")?,
-             HeaderValue::from_str(&format!("Client-ID {}", self.get_settings().client_id))?),
-            (HeaderName::from_str("Accept")?,
-             HeaderValue::from_str("application/vnd.api+json")?)
-        ].iter().cloned().collect())
+        Ok([
+            (
+                HeaderName::from_str("Authorization")?,
+                HeaderValue::from_str(&format!("Client-ID {}", self.get_settings().client_id))?,
+            ),
+            (
+                HeaderName::from_str("Accept")?,
+                HeaderValue::from_str("application/vnd.api+json")?,
+            ),
+        ]
+        .iter()
+        .cloned()
+        .collect())
     }
 
     fn get_client(&self) -> &ReqwestClient {
@@ -122,11 +137,21 @@ pub struct AuthenticatedClient {
 impl Client for AuthenticatedClient {
     fn get_headers(&self) -> Result<HeaderMap, ClientError> {
         Ok([
-            (HeaderName::from_str("Authorization")?,
-             HeaderValue::from_str(&format!("Bearer {}", self.get_authentication_settings().access_token))?),
-            (HeaderName::from_str("Accept")?,
-             HeaderValue::from_str("application/vnd.api+json")?)
-        ].iter().cloned().collect())
+            (
+                HeaderName::from_str("Authorization")?,
+                HeaderValue::from_str(&format!(
+                    "Bearer {}",
+                    self.get_authentication_settings().access_token
+                ))?,
+            ),
+            (
+                HeaderName::from_str("Accept")?,
+                HeaderValue::from_str("application/vnd.api+json")?,
+            ),
+        ]
+        .iter()
+        .cloned()
+        .collect())
     }
 
     fn get_client(&self) -> &ReqwestClient {
@@ -143,7 +168,11 @@ impl RegisteredClient for AuthenticatedClient {
         &self.authentication_settings
     }
 
-    fn update_authentication_token(&mut self, access_token: AccessToken, expires_in: DateTime<Utc>) {
+    fn update_authentication_token(
+        &mut self,
+        access_token: AccessToken,
+        expires_in: DateTime<Utc>,
+    ) {
         self.authentication_settings.access_token = access_token;
         self.authentication_settings.expires_in = expires_in
     }
@@ -171,12 +200,16 @@ impl Default for SortPreference {
 
 impl fmt::Display for SortPreference {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", match self {
-            SortPreference::Newest => "newest",
-            SortPreference::Oldest => "oldest",
-            SortPreference::Best => "best",
-            SortPreference::Worst => "worst",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                SortPreference::Newest => "newest",
+                SortPreference::Oldest => "oldest",
+                SortPreference::Best => "best",
+                SortPreference::Worst => "worst",
+            }
+        )
     }
 }
 
@@ -207,10 +240,13 @@ mod tests {
         let client_secret = ClientSecret::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?;
 
-        let account = client.get_client()
+        let account = client
+            .get_client()
             .get("https://api.imgur.com/3/account/ghostinspector")
-            .send().await?
-            .json::<Basic<Account>>().await?;
+            .send()
+            .await?
+            .json::<Basic<Account>>()
+            .await?;
 
         println!("{:#?}", account);
 
@@ -223,10 +259,13 @@ mod tests {
         let client_secret = ClientSecret::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?;
 
-        let data = client.get_client()
+        let data = client
+            .get_client()
             .get("https://api.imgur.com/3/album/z6B0j")
-            .send().await?
-            .json::<Basic<Album>>().await?;
+            .send()
+            .await?
+            .json::<Basic<Album>>()
+            .await?;
 
         println!("{:?}", data);
 
@@ -239,10 +278,13 @@ mod tests {
         let client_secret = ClientSecret::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?;
 
-        let data = client.get_client()
+        let data = client
+            .get_client()
             .get("https://api.imgur.com/3/comment/1938633683")
-            .send().await?
-            .json::<Basic<Comment>>().await?;
+            .send()
+            .await?
+            .json::<Basic<Comment>>()
+            .await?;
 
         println!("{:?}", data);
 
@@ -289,7 +331,11 @@ mod tests {
         assert_eq!(data.status, 401);
         match data.data {
             Data::Content(_) => panic!("Should return error"),
-            Data::Error { error, request, method } => {
+            Data::Error {
+                error,
+                request,
+                method,
+            } => {
                 assert_eq!(error, ErrorMessage::new("Authentication required"));
                 assert_eq!(request, "/3/account/me/settings");
                 assert_eq!(method, Method::GET);

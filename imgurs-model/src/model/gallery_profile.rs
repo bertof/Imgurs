@@ -51,7 +51,7 @@ pub struct Trophy {
 mod test {
     use std::error::Error;
 
-    use crate::model::{basic::Basic};
+    use crate::model::basic::Basic;
     use crate::model::gallery_profile::GalleryProfile;
 
     #[test]

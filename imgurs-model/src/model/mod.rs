@@ -14,5 +14,5 @@ pub mod image;
 
 pub mod message;
 
-pub mod common;
 pub mod authorization;
+pub mod common;

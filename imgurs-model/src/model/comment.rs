@@ -56,10 +56,7 @@ pub struct Comment {
 mod test {
     use std::error::Error;
 
-    use crate::model::{
-        basic::Basic,
-        comment::Comment,
-    };
+    use crate::model::{basic::Basic, comment::Comment};
 
     #[test]
     fn test_deserialize_comment_local() -> Result<(), Box<dyn Error>> {

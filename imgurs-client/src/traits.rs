@@ -1,6 +1,6 @@
 //! API common traits
 use chrono::{DateTime, Utc};
-use reqwest::{Client as ReqwestClient, header::HeaderMap};
+use reqwest::{header::HeaderMap, Client as ReqwestClient};
 
 use imgurs_model::model::authorization::AccessToken;
 

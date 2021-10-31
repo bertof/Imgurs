@@ -8,18 +8,21 @@ pub mod unix_epoch {
     const FORMAT: &str = "%s";
 
     pub fn serialize<S>(date: &DateTime<Utc>, serializer: S) -> Result<S::Ok, S::Error>
-        where S: Serializer {
+    where
+        S: Serializer,
+    {
         serializer.serialize_i64(date.timestamp())
     }
 
     pub fn deserialize<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
-        where D: Deserializer<'de> {
+    where
+        D: Deserializer<'de>,
+    {
         let v = i64::deserialize(deserializer)?;
         Utc.datetime_from_str(&format!("{}", v), FORMAT)
             .map_err(serde::de::Error::custom)
     }
 }
-
 
 #[cfg(test)]
 mod test {

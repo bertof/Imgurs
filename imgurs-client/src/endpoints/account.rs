@@ -21,18 +21,20 @@ use crate::{
 #[async_trait]
 pub trait AccountClient: Client {
     /// Get account information by username
-    async fn get_account_by_username(&self, username: Username) -> Result<Response<Account>, ClientError> {
-        let res = self.get_client()
+    async fn get_account_by_username(
+        &self,
+        username: Username,
+    ) -> Result<Response<Account>, ClientError> {
+        let res = self
+            .get_client()
             .get(&format!("https://api.imgur.com/3/account/{}", username))
             .headers(self.get_headers()?)
-            .send().await?;
+            .send()
+            .await?;
         let headers = res.headers().clone();
         let content = res.json().await?;
 
-        Ok(Response {
-            content,
-            headers,
-        })
+        Ok(Response { content, headers })
     }
 
     // /// Get account by user id
@@ -49,7 +51,10 @@ pub trait AccountClient: Client {
     // }
 
     /// Get account block status
-    async fn get_account_block_status(&self, username: &Username) -> Result<Response<BlockedStatus>, ClientError> {
+    async fn get_account_block_status(
+        &self,
+        username: &str,
+    ) -> Result<Response<BlockedStatus>, ClientError> {
         #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
         #[serde(rename_all = "snake_case")]
         #[serde(deny_unknown_fields)]
@@ -57,10 +62,15 @@ pub trait AccountClient: Client {
             data: BlockedStatus,
         }
 
-        let res = self.get_client()
-            .get(&format!("https://api.imgur.com/account/v1/{}/block", username))
+        let res = self
+            .get_client()
+            .get(&format!(
+                "https://api.imgur.com/account/v1/{}/block",
+                username
+            ))
             .headers(self.get_headers()?)
-            .send().await?;
+            .send()
+            .await?;
 
         let headers = res.headers().clone();
         let status = res.status();
@@ -79,11 +89,19 @@ pub trait AccountClient: Client {
     /// Get account images
     ///
     /// TODO: missing response typing
-    async fn get_account_images(&self, username: &Username) -> Result<Response<Vec<serde_json::Value>>, ClientError> {
-        let res = self.get_client()
-            .get(&format!("https://api.imgur.com/3/account/{}/images", &username))
+    async fn get_account_images(
+        &self,
+        username: &str,
+    ) -> Result<Response<Vec<serde_json::Value>>, ClientError> {
+        let res = self
+            .get_client()
+            .get(&format!(
+                "https://api.imgur.com/3/account/{}/images",
+                &username
+            ))
             .headers(self.get_headers()?)
-            .send().await?;
+            .send()
+            .await?;
 
         let headers = res.headers().clone();
         let content = res.json().await?;
@@ -94,8 +112,16 @@ pub trait AccountClient: Client {
     /// Account gallery favorites
     ///
     /// Return the images the user has favorited in the gallery
-    async fn get_gallery_favorites(&self, username: &Username, page: Option<u64>, sort: Option<SortPreference>) -> Result<Response<Vec<CustomGalleryItem>>, ClientError> {
-        let mut url = format!("https://api.imgur.com/3/account/{}/gallery_favorites", username);
+    async fn get_gallery_favorites(
+        &self,
+        username: &str,
+        page: Option<u64>,
+        sort: Option<SortPreference>,
+    ) -> Result<Response<Vec<CustomGalleryItem>>, ClientError> {
+        let mut url = format!(
+            "https://api.imgur.com/3/account/{}/gallery_favorites",
+            username
+        );
         if let Some(page) = page {
             url = format!("{}/{}", url, page);
         }
@@ -105,24 +131,25 @@ pub trait AccountClient: Client {
 
         println!("{}", url);
 
-        let res = self.get_client()
+        let res = self
+            .get_client()
             .get(&url)
             .headers(self.get_headers()?)
-            .send().await?;
+            .send()
+            .await?;
 
         let headers = res.headers().clone();
         let text = res.text().await?;
 
-        println!("{}", serde_json::to_string_pretty(
-            &serde_json::from_str::<serde_json::Value>(&text)?)?);
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&serde_json::from_str::<serde_json::Value>(&text)?)?
+        );
 
         let content = serde_json::from_str(&text)?;
         // let content = res.json().await?;
 
-        Ok(Response {
-            content,
-            headers,
-        })
+        Ok(Response { content, headers })
     }
 }
 
@@ -134,56 +161,78 @@ pub trait AccountRegisteredClient: AccountClient + RegisteredClient {
         self.get_client()
             .get("https://api.imgur.com/3/account/me/block")
             .headers(self.get_headers()?)
-            .send().await?
-            .json().await
+            .send()
+            .await?
+            .json()
+            .await
             .map_err(Into::into)
     }
 
     /// Create a block for an account
-    async fn create_account_block(&self, username: &Username) -> Result<Response<BlockedStatus>, ClientError> {
-        let res = self.get_client()
-            .put(&format!("https://api.imgur.com/account/v1/{}/block", username))
+    async fn create_account_block(
+        &self,
+        username: &str,
+    ) -> Result<Response<BlockedStatus>, ClientError> {
+        let res = self
+            .get_client()
+            .put(&format!(
+                "https://api.imgur.com/account/v1/{}/block",
+                username
+            ))
             .headers(self.get_headers()?)
-            .send().await?;
+            .send()
+            .await?;
 
         let headers = res.headers().clone();
         let content = res.json().await?;
 
-        Ok(Response {
-            content,
-            headers,
-        })
+        Ok(Response { content, headers })
     }
 
     /// Remove a block for an account
-    async fn remove_account_block(&self, username: &Username) -> Result<Response<BlockedStatus>, ClientError> {
-        let res = self.get_client()
-            .delete(&format!("https://api.imgur.com/account/v1/{}/block", username))
+    async fn remove_account_block(
+        &self,
+        username: &str,
+    ) -> Result<Response<BlockedStatus>, ClientError> {
+        let res = self
+            .get_client()
+            .delete(&format!(
+                "https://api.imgur.com/account/v1/{}/block",
+                username
+            ))
             .headers(self.get_headers()?)
-            .send().await?;
+            .send()
+            .await?;
 
         let headers = res.headers().clone();
         let content = res.json().await?;
 
-        Ok(Response {
-            content,
-            headers,
-        })
+        Ok(Response { content, headers })
     }
 
     /// Get images of the current user
-    async fn get_user_account_images(&self) -> Result<Response<Vec<serde_json::Value>>, ClientError> {
-        self.get_account_images(&"me".into()).await
+    async fn get_user_account_images(
+        &self,
+    ) -> Result<Response<Vec<serde_json::Value>>, ClientError> {
+        self.get_account_images("me").await
     }
 
     /// Get favourite galleries of the current user
-    async fn get_user_gallery_favorites(&self, page: Option<u64>, sort: Option<SortPreference>) -> Result<Response<Vec<CustomGalleryItem>>, ClientError> {
-        self.get_gallery_favorites(&"me".into(), page, sort).await
+    async fn get_user_gallery_favorites(
+        &self,
+        page: Option<u64>,
+        sort: Option<SortPreference>,
+    ) -> Result<Response<Vec<CustomGalleryItem>>, ClientError> {
+        self.get_gallery_favorites("me", page, sort).await
     }
 
     // TODO: typed implementation
     /// Get favourites of the current user
-    async fn get_user_favorites(&self, page: Option<u64>, sort: Option<SortPreference>) -> Result<Response<serde_json::Value>, ClientError> {
+    async fn get_user_favorites(
+        &self,
+        page: Option<u64>,
+        sort: Option<SortPreference>,
+    ) -> Result<Response<serde_json::Value>, ClientError> {
         let mut url = "https://api.imgur.com/3/account/me/favorites".to_string();
         if let Some(page) = page {
             url = format!("{}/{}", url, page);
@@ -194,26 +243,28 @@ pub trait AccountRegisteredClient: AccountClient + RegisteredClient {
 
         println!("{}", url);
 
-        let res = self.get_client()
+        let res = self
+            .get_client()
             .get(&url)
             .headers(self.get_headers()?)
-            .send().await?;
+            .send()
+            .await?;
 
         let headers = res.headers().clone();
         println!("{:?}", headers);
         let content = res.json().await?;
 
-
-        Ok(Response {
-            content,
-            headers,
-        })
+        Ok(Response { content, headers })
     }
 
     /// Account submissions
     ///
     /// Return the images a user has submitted to the gallery. You can add sorting as well after paging. Sorts can be: newest (default), oldest, worst, best.
-    async fn get_user_submissions(&self, page: Option<u64>, sort: Option<SortPreference>) -> Result<Response<serde_json::Value>, ClientError> {
+    async fn get_user_submissions(
+        &self,
+        page: Option<u64>,
+        sort: Option<SortPreference>,
+    ) -> Result<Response<serde_json::Value>, ClientError> {
         let mut url = "https://api.imgur.com/3/account/me/submissions".to_string();
         if let Some(page) = page {
             url = format!("{}/{}", url, page);
@@ -222,18 +273,17 @@ pub trait AccountRegisteredClient: AccountClient + RegisteredClient {
             url = format!("{}/{}", url, sort);
         }
 
-        let res = self.get_client()
+        let res = self
+            .get_client()
             .get(&url)
             .headers(self.get_headers()?)
-            .send().await?;
+            .send()
+            .await?;
 
         let headers = res.headers().clone();
         let content = res.json().await?;
 
-        Ok(Response {
-            content,
-            headers,
-        })
+        Ok(Response { content, headers })
     }
 }
 
@@ -254,12 +304,9 @@ mod tests {
         traits::from_env::FromEnv,
     };
 
-    use crate::{
-        client::BasicClient,
-        endpoints::account::AccountClient,
-    };
-    use crate::endpoints::authorization::AuthenticationRegisteredClient;
     use crate::endpoints::account::AccountRegisteredClient;
+    use crate::endpoints::authorization::AuthenticationRegisteredClient;
+    use crate::{client::BasicClient, endpoints::account::AccountClient};
 
     #[tokio::test]
     async fn test_get_account_by_username() -> Result<(), Box<dyn Error>> {
@@ -267,8 +314,10 @@ mod tests {
         let client_secret = ClientSecret::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?;
         let res = client
-            .get_account_by_username("bertof".into()).await?
-            .content.result()?;
+            .get_account_by_username("bertof".into())
+            .await?
+            .content
+            .result()?;
 
         println!("{:#?}", res);
         assert_eq!(&res.url.to_string(), "bertof");
@@ -296,8 +345,7 @@ mod tests {
         let client_id = ClientID::from_default_env()??;
         let client_secret = ClientSecret::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?;
-        let res = client
-            .get_account_block_status(&"bertof".into()).await?;
+        let res = client.get_account_block_status(&"bertof".into()).await?;
 
         println!("{:#?}", res);
 
@@ -315,15 +363,13 @@ mod tests {
         let refresh_token = RefreshToken::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?
             .with_tokens(access_token, refresh_token, Utc::now())?
-            .with_fresh_tokens().await?;
+            .with_fresh_tokens()
+            .await?;
 
-        let res = client
-            .get_account_blocks()
-            .await?.result()?;
+        let res = client.get_account_blocks().await?.result()?;
         println!("{:#?}", res);
         assert!(res.items.is_empty());
         assert_eq!(res.next, None);
-
 
         // TODO: enable test once method is implemented
         // let res = client
@@ -364,11 +410,10 @@ mod tests {
         let refresh_token = RefreshToken::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?
             .with_tokens(access_token, refresh_token, Utc::now())?
-            .with_fresh_tokens().await?;
+            .with_fresh_tokens()
+            .await?;
 
-        let res = client
-            .get_user_account_images().await?
-            .content.result()?;
+        let res = client.get_user_account_images().await?.content.result()?;
 
         println!("{:#?}", res);
 
@@ -385,11 +430,14 @@ mod tests {
         let refresh_token = RefreshToken::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?
             .with_tokens(access_token, refresh_token, Utc::now())?
-            .with_fresh_tokens().await?;
+            .with_fresh_tokens()
+            .await?;
 
         let res = client
-            .get_user_gallery_favorites(None, None).await?
-            .content.result()?;
+            .get_user_gallery_favorites(None, None)
+            .await?
+            .content
+            .result()?;
 
         println!("{:#?}", res);
 
@@ -404,11 +452,14 @@ mod tests {
         let refresh_token = RefreshToken::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?
             .with_tokens(access_token, refresh_token, Utc::now())?
-            .with_fresh_tokens().await?;
+            .with_fresh_tokens()
+            .await?;
 
         let res = client
-            .get_user_favorites(Some(0), None).await?
-            .content.result()?;
+            .get_user_favorites(Some(0), None)
+            .await?
+            .content
+            .result()?;
 
         println!("{:#?}", res);
 
@@ -423,11 +474,14 @@ mod tests {
         let refresh_token = RefreshToken::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?
             .with_tokens(access_token, refresh_token, Utc::now())?
-            .with_fresh_tokens().await?;
+            .with_fresh_tokens()
+            .await?;
 
         let res = client
-            .get_user_submissions(Some(0), None).await?
-            .content.result()?;
+            .get_user_submissions(Some(0), None)
+            .await?
+            .content
+            .result()?;
 
         println!("{:#?}", res);
 

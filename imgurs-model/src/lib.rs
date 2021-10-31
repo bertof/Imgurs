@@ -1,4 +1,5 @@
 //! API reference model
+#[deny(clippy::all)]
 pub mod error;
 pub mod model;
 pub mod serialization;

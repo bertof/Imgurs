@@ -2,13 +2,7 @@
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::{
-    model::{
-        gallery_album::GalleryAlbum,
-        gallery_image::GalleryImage,
-        common::Username,
-    }
-};
+use crate::model::{common::Username, gallery_album::GalleryAlbum, gallery_image::GalleryImage};
 
 /// Custom gallery
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -42,9 +36,7 @@ pub enum CustomGalleryItem {
 mod test {
     use std::error::Error;
 
-    use crate::{
-        model::{basic::Basic},
-    };
+    use crate::model::basic::Basic;
     use crate::model::custom_gallery::CustomGallery;
 
     // TODO: use a better example

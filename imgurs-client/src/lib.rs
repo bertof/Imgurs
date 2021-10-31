@@ -1,3 +1,5 @@
+//! Imgur client implementation
+#[deny(clippy::all)]
 pub mod client;
 pub mod error;
 pub mod response;

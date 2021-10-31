@@ -11,7 +11,10 @@ pub struct ErrorMessage(pub String);
 
 impl ErrorMessage {
     /// `ErrorMessage` constructor
-    pub fn new<T>(message: T) -> Self where T: Into<String> {
+    pub fn new<T>(message: T) -> Self
+    where
+        T: Into<String>,
+    {
         ErrorMessage(message.into())
     }
 }

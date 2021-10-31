@@ -6,16 +6,16 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::{
-    model::common::AccountID,
-    serialization::unix_epoch,
-};
+use crate::{model::common::AccountID, serialization::unix_epoch};
 
 /// Gallery image unique ID
 #[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
 pub struct GalleryImageID(String);
 
-impl<U> From<U> for GalleryImageID where U: Into<String> {
+impl<U> From<U> for GalleryImageID
+where
+    U: Into<String>,
+{
     fn from(v: U) -> Self {
         GalleryImageID(v.into())
     }
@@ -119,7 +119,7 @@ pub struct GalleryImage {
 mod test {
     use std::error::Error;
 
-    use crate::model::{basic::Basic};
+    use crate::model::basic::Basic;
     use crate::model::gallery_image::GalleryImage;
 
     #[test]
