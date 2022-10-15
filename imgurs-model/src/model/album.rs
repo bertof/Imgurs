@@ -2,12 +2,11 @@
 
 use std::fmt;
 
-use chrono::{DateTime, Utc};
+use crate::model::common::AccountID;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use time::{serde::timestamp, OffsetDateTime};
 use url::Url;
-
-use crate::{model::common::AccountID, serialization::unix_epoch};
 
 /// Album unique identifier
 #[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
@@ -40,8 +39,8 @@ pub struct Album {
     /// The description of the album in the gallery
     pub description: Option<String>,
     /// Time inserted into the gallery, epoch time
-    #[serde(with = "unix_epoch")]
-    pub datetime: DateTime<Utc>,
+    #[serde(with = "timestamp")]
+    pub datetime: OffsetDateTime,
     /// The ID of the album cover image
     pub cover: Option<String>,
     /// TODO: missing from API model

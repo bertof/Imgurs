@@ -1,13 +1,10 @@
 //! User account specification
 
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use time::{serde::timestamp, OffsetDateTime};
 use url::Url;
 
-use crate::{
-    model::common::{AccountID, ProExpiration, Username},
-    serialization::unix_epoch,
-};
+use crate::model::common::{AccountID, ProExpiration, Username};
 
 /// Basic account information representation.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -33,8 +30,8 @@ pub struct Account {
     /// String description of the user reputation
     pub reputation_name: String,
     /// The epoch time of account creation
-    #[serde(with = "unix_epoch")]
-    pub created: DateTime<Utc>,
+    #[serde(with = "timestamp")]
+    pub created: OffsetDateTime,
     /// False if not a pro user, their expiration date if they are.
     pub pro_expiration: ProExpiration,
     /// Blocked status

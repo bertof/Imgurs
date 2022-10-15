@@ -1,8 +1,6 @@
 //! Common data objects
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-
-use crate::serialization::unix_epoch;
+use time::{serde::timestamp, OffsetDateTime};
 
 /// Account username
 pub type Username = String;
@@ -18,9 +16,9 @@ pub type AccountID = u64;
 #[serde(deny_unknown_fields)]
 #[serde(untagged)]
 pub enum ProExpiration {
-    /// Expiration date of the pro status
-    #[serde(with = "unix_epoch")]
-    Date(DateTime<Utc>),
+    /// Expiration date of the pro status as unix timestamp
+    #[serde(with = "timestamp")]
+    Date(OffsetDateTime),
     /// Boolean of whether the account has a pro status
     Bool(bool),
 }

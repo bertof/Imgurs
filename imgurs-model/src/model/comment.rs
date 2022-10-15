@@ -1,12 +1,8 @@
 //! Comment specification
 
-use chrono::{DateTime, Utc};
+use crate::model::common::{AccountID, Username};
 use serde::{Deserialize, Serialize};
-
-use crate::{
-    model::common::{AccountID, Username},
-    serialization::unix_epoch,
-};
+use time::{serde::timestamp, OffsetDateTime};
 
 /// The base model for a comment.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -34,8 +30,8 @@ pub struct Comment {
     /// the number of upvotes - downvotes
     pub points: f64,
     /// Timestamp of creation, epoch time
-    #[serde(with = "unix_epoch")]
-    pub datetime: DateTime<Utc>,
+    #[serde(with = "timestamp")]
+    pub datetime: OffsetDateTime,
     /// If this is a reply, this will be the value of the comment_id for the caption this a reply for.
     ///
     /// Defaults to 0 if it isn't a reply

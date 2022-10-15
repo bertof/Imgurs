@@ -72,6 +72,7 @@
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             bacon
+            cargo-audit
             cargo-outdated
             crate2nix
             openssl.dev

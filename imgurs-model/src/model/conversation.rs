@@ -1,11 +1,10 @@
 //! Conversation specification
 
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use time::{serde::timestamp, OffsetDateTime};
 
 use crate::model::common::AccountID;
 use crate::model::message::Message;
-use crate::serialization::unix_epoch;
 
 /// The base model for a conversation.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -25,8 +24,8 @@ pub struct ConversationEntry {
     /// TODO: check if Option
     pub last_message_preview: String,
     /// Time of last sent message, epoch time
-    #[serde(with = "unix_epoch")]
-    pub datetime: DateTime<Utc>,
+    #[serde(with = "timestamp")]
+    pub datetime: OffsetDateTime,
     /// Account ID of the other user in conversation
     pub with_account_id: AccountID,
     /// Account username of the other user in conversation

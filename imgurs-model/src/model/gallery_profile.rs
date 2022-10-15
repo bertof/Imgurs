@@ -1,10 +1,8 @@
 //! Gallery profile specification
 
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use time::{serde::timestamp, OffsetDateTime};
 use url::Url;
-
-use crate::serialization::unix_epoch;
 
 /// The totals for a users gallery information.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -41,8 +39,8 @@ pub struct Trophy {
     /// A link to where the trophy was earned
     data_link: Option<Url>,
     /// Date the trophy was earned, epoch time
-    #[serde(with = "unix_epoch")]
-    datetime: DateTime<Utc>,
+    #[serde(with = "timestamp")]
+    datetime: OffsetDateTime,
     /// URL of the image representing the trophy
     image: Url,
 }

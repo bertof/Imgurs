@@ -1,21 +1,15 @@
-use std::{error::Error, fmt, str::FromStr};
-
-use chrono::{DateTime, Utc};
+use crate::{
+    error::ClientError,
+    traits::{Client, RegisteredClient},
+};
+use imgurs_model::model::authorization::{AccessToken, ClientID, ClientSecret, RefreshToken};
 use reqwest::{
     header::{HeaderMap, HeaderName, HeaderValue},
     Client as ReqwestClient, ClientBuilder as ReqwestClientBuilder,
 };
 use serde::{Deserialize, Serialize};
-
-use imgurs_model::{
-    model::authorization::{AccessToken, ClientID, ClientSecret, RefreshToken},
-    serialization::unix_epoch,
-};
-
-use crate::{
-    error::ClientError,
-    traits::{Client, RegisteredClient},
-};
+use std::{error::Error, fmt, str::FromStr};
+use time::{serde::timestamp, OffsetDateTime};
 
 /// Client basic settings
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -34,8 +28,8 @@ pub struct AuthenticationSettings {
     /// Refresh token
     pub refresh_token: RefreshToken,
     /// Access token expiration
-    #[serde(with = "unix_epoch")]
-    pub expires_in: DateTime<Utc>,
+    #[serde(with = "timestamp")]
+    pub expires_in: OffsetDateTime,
 }
 
 /// Client
@@ -80,7 +74,7 @@ impl BasicClient {
         expires_in: C,
     ) -> Result<AuthenticatedClient, Box<dyn Error>>
     where
-        C: Into<DateTime<Utc>>,
+        C: Into<OffsetDateTime>,
     {
         // TODO: input checks
 
@@ -171,7 +165,7 @@ impl RegisteredClient for AuthenticatedClient {
     fn update_authentication_token(
         &mut self,
         access_token: AccessToken,
-        expires_in: DateTime<Utc>,
+        expires_in: OffsetDateTime,
     ) {
         self.authentication_settings.access_token = access_token;
         self.authentication_settings.expires_in = expires_in
@@ -215,10 +209,6 @@ impl fmt::Display for SortPreference {
 
 #[cfg(test)]
 mod tests {
-    use std::error::Error;
-
-    use reqwest::StatusCode;
-
     use imgurs_model::{
         error::ErrorMessage,
         model::{
@@ -229,15 +219,16 @@ mod tests {
             basic::{Basic, Data, Method},
             comment::Comment,
         },
-        traits::from_env::FromEnv,
     };
+    use reqwest::StatusCode;
+    use std::{convert::TryFrom, env, error::Error};
 
     use crate::{client::BasicClient, traits::Client};
 
     #[tokio::test]
     async fn test_deserialize_account_remote() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::from_default_env()??;
-        let client_secret = ClientSecret::from_default_env()??;
+        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
+        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
         let client = BasicClient::new(client_id, client_secret)?;
 
         let account = client
@@ -255,8 +246,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_deserialize_album_remote() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::from_default_env()??;
-        let client_secret = ClientSecret::from_default_env()??;
+        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
+        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
         let client = BasicClient::new(client_id, client_secret)?;
 
         let data = client
@@ -274,8 +265,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_deserialize_comment_remote() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::from_default_env()??;
-        let client_secret = ClientSecret::from_default_env()??;
+        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
+        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
         let client = BasicClient::new(client_id, client_secret)?;
 
         let data = client
