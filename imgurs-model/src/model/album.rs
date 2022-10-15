@@ -1,12 +1,14 @@
 //! Album specification
 
-use std::fmt;
+use std::{collections::HashMap, fmt};
 
 use crate::model::common::AccountID;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use time::{serde::timestamp, OffsetDateTime};
 use url::Url;
+
+use super::image::Image;
 
 /// Album unique identifier
 #[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
@@ -30,7 +32,6 @@ impl fmt::Display for AlbumID {
 /// The base model for an album
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-#[serde(deny_unknown_fields)]
 pub struct Album {
     /// The ID for the album
     pub id: AlbumID,
@@ -43,8 +44,6 @@ pub struct Album {
     pub datetime: OffsetDateTime,
     /// The ID of the album cover image
     pub cover: Option<String>,
-    /// TODO: missing from API model
-    pub cover_edited: Option<Value>,
     /// The width, in pixels, of the album cover image
     pub cover_width: Option<u64>,
     /// The height, in pixels, of the album cover image
@@ -54,10 +53,10 @@ pub struct Album {
     /// The account ID or null if it's anonymous.
     pub account_id: Option<AccountID>,
     /// The privacy level of the album, you can only view public if not logged in as album owner
-    // TODO: Switch to enum
+    /// TODO: Switch to enum
     pub privacy: String,
     /// The view layout of the album.
-    // TODO: Switch to enum
+    /// TODO: Switch to enum
     pub layout: String,
     /// The number of album views
     pub views: u64,
@@ -77,35 +76,137 @@ pub struct Album {
     /// The total number of images in the album
     pub images_count: u64,
     /// An array of all the images in the album (only available when requesting the direct album)
-    ///
-    /// TODO: switch to image object
-    pub images: Vec<Value>,
+    pub images: Vec<Image>,
     /// True if the image has been submitted to the gallery, false if otherwise.
     pub in_gallery: bool,
-    /// True if the image is an ad
-    pub is_ad: bool,
-    /// TODO: missing from API model
-    pub include_album_ads: bool,
-    /// TODO: missing from API model
-    pub is_album: bool,
-    /// TODO: missing from API model, switch to an object
-    pub ad_config: Value,
+
+    /// Other fields that are missing from the API model
+    #[serde(flatten)]
+    pub other: HashMap<String, Value>,
 }
 
 #[cfg(test)]
 mod test {
-    use std::error::Error;
-
-    use crate::model::{album::Album, basic::Basic};
+    use crate::model::{
+        album::{Album, AlbumID},
+        basic::Basic,
+    };
+    use time::macros::datetime;
 
     #[test]
-    fn test_deserialize_album_local() -> Result<(), Box<dyn Error>> {
-        let res = r#"{"data":{"id":"z6B0j","title":"DOOGLE","description":null,"datetime":1515221993,"cover":null,"cover_edited":null,"cover_width":null,"cover_height":null,"account_url":null,"account_id":null,"privacy":"public","layout":"blog","views":84,"link":"https://imgur.com/a/z6B0j","favorite":false,"nsfw":false,"section":"ImgurAlbums","images_count":1,"in_gallery":false,"is_ad":false,"include_album_ads":false,"is_album":true,"images":[{"id":"1nneRbX","title":"DOOGLE","description":"Doogle","datetime":1515221708,"type":"image/png","animated":false,"width":1279,"height":717,"size":379024,"views":8705,"bandwidth":3299403920,"vote":null,"favorite":false,"nsfw":null,"section":null,"account_url":null,"account_id":null,"is_ad":false,"in_most_viral":false,"has_sound":false,"tags":[],"ad_type":0,"ad_url":"","edited":"0","in_gallery":false,"link":"https://i.imgur.com/1nneRbX.png"}],"ad_config":{"safeFlags":["not_in_gallery","subreddit","page_load"],"highRiskFlags":[],"unsafeFlags":["sixth_mod_unsafe"],"wallUnsafeFlags":[],"showsAds":false}},"success":true,"status":200}"#;
+    fn test_deserialize_album_local() {
+        let res = r#"{
+          "data": {
+            "id": "z6B0j",
+            "title": "DOOGLE",
+            "description": null,
+            "datetime": 1515221993,
+            "cover": null,
+            "cover_edited": null,
+            "cover_width": null,
+            "cover_height": null,
+            "account_url": null,
+            "account_id": null,
+            "privacy": "public",
+            "layout": "blog",
+            "views": 84,
+            "link": "https://imgur.com/a/z6B0j",
+            "favorite": false,
+            "nsfw": false,
+            "section": "ImgurAlbums",
+            "images_count": 1,
+            "in_gallery": false,
+            "is_ad": false,
+            "include_album_ads": false,
+            "is_album": true,
+            "images": [
+              {
+                "id": "1nneRbX",
+                "title": "DOOGLE",
+                "description": "Doogle",
+                "datetime": 1515221708,
+                "type": "image/png",
+                "animated": false,
+                "width": 1279,
+                "height": 717,
+                "size": 379024,
+                "views": 8705,
+                "bandwidth": 3299403920,
+                "vote": null,
+                "favorite": false,
+                "nsfw": null,
+                "section": null,
+                "account_url": null,
+                "account_id": null,
+                "is_ad": false,
+                "in_most_viral": false,
+                "has_sound": false,
+                "tags": [],
+                "ad_type": 0,
+                "ad_url": "",
+                "edited": "0",
+                "in_gallery": false,
+                "link": "https://i.imgur.com/1nneRbX.png"
+              }
+            ],
+            "ad_config": {
+              "safeFlags": [
+                "not_in_gallery",
+                "subreddit",
+                "page_load"
+              ],
+              "highRiskFlags": [],
+              "unsafeFlags": [
+                "sixth_mod_unsafe"
+              ],
+              "wallUnsafeFlags": [],
+              "showsAds": false
+            }
+          },
+          "success": true,
+          "status": 200
+        }
+        "#;
+        let album = serde_json::from_str::<Basic<Album>>(res)
+            .unwrap()
+            .result()
+            .unwrap();
+        println!("{:#?}", album);
+        assert_eq!(album.id, AlbumID::from("z6B0j"));
+        assert_eq!(album.title, "DOOGLE");
+        assert_eq!(album.description, None);
+        assert_eq!(album.cover, None);
+        assert_eq!(album.cover_width, None);
+        assert_eq!(album.cover_height, None);
+        assert_eq!(album.account_url, None);
+        assert_eq!(album.account_id, None);
+        assert_eq!(album.privacy, "public");
+        assert_eq!(album.layout, "blog");
+        assert_eq!(album.views, 84);
+        assert_eq!(album.link.to_string(), "https://imgur.com/a/z6B0j");
+        assert!(!album.favorite);
+        assert!(!album.nsfw);
+        assert_eq!(album.section, "ImgurAlbums");
+        assert_eq!(album.images_count, 1);
+        assert_eq!(album.images_count, album.images.len() as u64);
+        assert!(!album.in_gallery);
 
-        let data = serde_json::from_str::<Basic<Album>>(res)?;
-
-        println!("{:#?}", data);
-
-        Ok(())
+        let image = &album.images[0];
+        assert_eq!(image.id, "1nneRbX");
+        assert_eq!(image.title, "DOOGLE");
+        assert_eq!(image.description, Some("Doogle".to_string()));
+        assert_eq!(image.datetime, datetime!(2018-01-06 6:55:08.0 UTC));
+        assert_eq!(image.mime_type, "image/png".to_string());
+        assert!(!image.animated);
+        assert_eq!(image.width, 1279);
+        assert_eq!(image.height, 717);
+        assert_eq!(image.size, 379024);
+        assert_eq!(image.views, 8705);
+        assert_eq!(image.bandwidth, 3299403920);
+        assert_eq!(image.vote, None);
+        assert!(!image.favorite);
+        assert_eq!(image.nsfw, None);
+        assert_eq!(image.section, None);
+        assert_eq!(image.link.to_string(), "https://i.imgur.com/1nneRbX.png");
     }
 }
