@@ -320,7 +320,7 @@ mod tests {
             .result()?;
 
         println!("{:#?}", res);
-        assert_eq!(&res.url.to_string(), "bertof");
+        assert_eq!(&res.url, "bertof");
         assert_eq!(res.id.to_string(), "57420253");
 
         Ok(())
@@ -345,7 +345,7 @@ mod tests {
         let client_id = ClientID::from_default_env()??;
         let client_secret = ClientSecret::from_default_env()??;
         let client = BasicClient::new(client_id, client_secret)?;
-        let res = client.get_account_block_status(&"bertof".into()).await?;
+        let res = client.get_account_block_status("bertof").await?;
 
         println!("{:#?}", res);
 

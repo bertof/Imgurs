@@ -156,7 +156,7 @@ impl fmt::Display for RefreshToken {
 ///
 /// Is used for obtaining the the access and refresh tokens.
 /// It's purpose is to be immediately exchanged for an access_token and refresh_token.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct AuthorizationCode(pub String);
 
@@ -192,7 +192,7 @@ impl fmt::Display for AuthorizationCode {
 /// Is also used for obtaining the the access and refresh tokens, but it's presented to the user so
 /// that they can enter it directly into your app.
 /// It's purpose is to be immediately exchanged for an access_token and refresh_token.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct PINCode(pub String);
 
@@ -224,7 +224,7 @@ impl fmt::Display for PINCode {
 }
 
 /// Type of the obtained token
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct TokenType(pub String);
 
@@ -235,7 +235,7 @@ impl fmt::Display for TokenType {
 }
 
 /// Authorization API response
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct AuthorizationResponse {
     /// Access token
@@ -256,7 +256,7 @@ pub struct AuthorizationResponse {
 }
 
 /// Refresh token API response
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct RefreshResponse {
     /// Access token
