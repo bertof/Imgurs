@@ -1,9 +1,9 @@
 [package]
 name = "imgurs-client"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Filippo Berto <berto.f@protonmail.com>"]
 edition = "2018"
-categories = ["API"]
+categories = ["api-bindings"]
 keywords = ["Imgur", "api"]
 repository = "https://github.com/bertof/Imgurs"
 license = "MIT"
@@ -12,9 +12,8 @@ description = "Client for a typed and safe interface to the Imgur API"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-imgurs-model = { path = "../imgurs-model" }
-
 async-trait = "0.1"
+imgurs-model = "0.2"
 reqwest = { version = "0.11", features = [ "json", "rustls-tls" ], default-features = false }
 serde_json = "1.0"
 serde = { version = "1.0", features = [ "derive" ] }
@@ -23,7 +22,6 @@ tracing = { version = "0.1", features = [ "attributes" ] }
 url = { version = "2.2", features = [ "serde" ] }
 
 [dev-dependencies]
-imgurs-model = { path = "../imgurs-model", features = [ "from_env" ] }
 tokio = { version = "1.13", features = [ "rt-multi-thread", "macros" ] }
 
 [features]
