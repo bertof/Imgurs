@@ -1,6 +1,9 @@
 //! Conversation specification
 
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use time::{serde::timestamp, OffsetDateTime};
 
 use crate::model::common::AccountID;
@@ -15,7 +18,6 @@ pub struct Conversation(pub Vec<ConversationEntry>);
 /// An item of a conversation
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-#[serde(deny_unknown_fields)]
 pub struct ConversationEntry {
     /// Conversation ID
     pub id: u64,
@@ -38,17 +40,18 @@ pub struct ConversationEntry {
     pub done: Option<bool>,
     /// OPTIONAL: (only available when requesting a specific conversation) Number of the next page
     pub page: Option<u64>,
+
+    /// Other fields that are missing from the API model
+    #[serde(flatten)]
+    pub other: HashMap<String, Value>,
 }
 
 #[cfg(test)]
 mod test {
-    use std::error::Error;
-
-    use crate::model::basic::Basic;
-    use crate::model::conversation::Conversation;
+    use crate::model::{basic::Basic, conversation::Conversation};
 
     #[test]
-    fn test_deserialize_conversation_local() -> Result<(), Box<dyn Error>> {
+    fn test_deserialize_conversation_local() {
         let res = r#"{
             "data": [
                 {
@@ -63,11 +66,10 @@ mod test {
             "success": true,
             "status": 200
         }"#;
-
-        let data = serde_json::from_str::<Basic<Conversation>>(res)?;
-
+        let data = serde_json::from_str::<Basic<Conversation>>(res)
+            .unwrap()
+            .result()
+            .unwrap();
         println!("{:#?}", data);
-
-        Ok(())
     }
 }

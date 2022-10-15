@@ -10,11 +10,16 @@ use crate::error::ErrorMessage;
 #[serde(rename_all = "snake_case")]
 #[serde(deny_unknown_fields)]
 pub struct Basic<T> {
-    /// Response data
+    /// Response data.
+    ///
+    /// Is null, boolean, or integer value. If it's a post then this will contain an object with the all
+    /// generated values, such as an ID.
     pub data: Data<T>,
-    /// Success status
+    /// Success status.
+    ///
+    /// Was the request successful
     pub success: bool,
-    /// HTTP status
+    /// HTTP status code
     pub status: u16,
 }
 

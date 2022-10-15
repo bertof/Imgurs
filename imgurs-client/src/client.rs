@@ -256,9 +256,12 @@ mod tests {
             .send()
             .await?
             .json::<Basic<Album>>()
-            .await?;
+            .await
+            .unwrap()
+            .result()
+            .unwrap();
 
-        println!("{:?}", data);
+        println!("{:#?}", data);
 
         Ok(())
     }
@@ -275,9 +278,12 @@ mod tests {
             .send()
             .await?
             .json::<Basic<Comment>>()
-            .await?;
+            .await
+            .unwrap()
+            .result()
+            .unwrap();
 
-        println!("{:?}", data);
+        println!("{:#?}", data);
 
         Ok(())
     }
