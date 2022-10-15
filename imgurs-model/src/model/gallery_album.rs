@@ -1,12 +1,9 @@
 //! Gallery album specification
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use time::{serde::timestamp, OffsetDateTime};
 use url::Url;
 
-use crate::{
-    model::{common::AccountID, gallery_image::GalleryImage},
-    serialization::unix_epoch,
-};
+use crate::model::{common::AccountID, gallery_image::GalleryImage};
 
 /// Gallery album
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -32,8 +29,8 @@ pub struct GalleryAlbum {
     /// The width, in pixels, of the album cover image
     pub cover_width: Option<u64>,
     /// Time inserted into the gallery, epoch time
-    #[serde(with = "unix_epoch")]
-    pub datetime: DateTime<Utc>,
+    #[serde(with = "timestamp")]
+    pub datetime: OffsetDateTime,
     /// The description of the album in the gallery
     pub description: Option<String>,
     /// Number of downvotes for the image

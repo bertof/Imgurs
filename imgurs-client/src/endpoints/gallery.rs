@@ -112,19 +112,14 @@ impl GalleryRegisteredClient for AuthenticatedClient {}
 
 #[cfg(test)]
 mod tests {
-    use std::error::Error;
-
-    use imgurs_model::{
-        model::authorization::{ClientID, ClientSecret},
-        traits::from_env::FromEnv,
-    };
-
     use crate::{client::BasicClient, endpoints::gallery::GalleryClient};
+    use imgurs_model::model::authorization::{ClientID, ClientSecret};
+    use std::{convert::TryFrom, env, error::Error};
 
     #[tokio::test]
     async fn test_deserialize_gallery_album_remote() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::from_default_env()??;
-        let client_secret = ClientSecret::from_default_env()??;
+        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
+        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
         let client = BasicClient::new(client_id, client_secret)?;
 
         let res = client
@@ -142,8 +137,8 @@ mod tests {
     #[ignore]
     #[tokio::test]
     async fn test_deserialize_gallery_image_remote() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::from_default_env()??;
-        let client_secret = ClientSecret::from_default_env()??;
+        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
+        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
         let client = BasicClient::new(client_id, client_secret)?;
 
         let res = client

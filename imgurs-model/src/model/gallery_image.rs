@@ -1,12 +1,10 @@
 //! Gallery image specification
 
-use std::fmt;
-
-use chrono::{DateTime, Utc};
+use crate::model::common::AccountID;
 use serde::{Deserialize, Serialize};
+use std::fmt;
+use time::{serde::timestamp, OffsetDateTime};
 use url::Url;
-
-use crate::{model::common::AccountID, serialization::unix_epoch};
 
 /// Gallery image unique ID
 #[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
@@ -47,8 +45,8 @@ pub struct GalleryImage {
     /// Number of comments on the gallery image.
     pub comment_count: Option<u64>,
     /// Time inserted into the gallery, epoch time
-    #[serde(with = "unix_epoch")]
-    pub datetime: DateTime<Utc>,
+    #[serde(with = "timestamp")]
+    pub datetime: OffsetDateTime,
     /// OPTIONAL, the deletehash, if you're logged in as the image owner
     #[serde(rename = "deletehash")]
     pub delete_hash: Option<String>,

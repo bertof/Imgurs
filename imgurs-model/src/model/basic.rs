@@ -6,7 +6,7 @@ use crate::error::ErrorMessage;
 /// API response common fields
 ///
 /// This is the basic response for requests that do not return data. If the POST request has a Basic model it will return the id.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[serde(deny_unknown_fields)]
 pub struct Basic<T> {
@@ -32,7 +32,7 @@ impl<T> Basic<T> {
 }
 
 /// API response data
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[serde(deny_unknown_fields)]
 #[serde(untagged)]

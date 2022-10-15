@@ -1,9 +1,7 @@
 //! Message specification
-use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
-
 use crate::model::common::AccountID;
-use crate::serialization::unix_epoch;
+use serde::{Deserialize, Serialize};
+use time::{serde::timestamp, OffsetDateTime};
 
 /// The base model for a message.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -23,6 +21,6 @@ pub struct Message {
     /// ID for the overall conversation
     conversation_id: u64,
     /// Time message was sent, epoch time
-    #[serde(with = "unix_epoch")]
-    datetime: DateTime<Utc>,
+    #[serde(with = "timestamp")]
+    datetime: OffsetDateTime,
 }

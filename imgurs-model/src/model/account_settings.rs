@@ -7,7 +7,7 @@ use crate::model::common::{AccountID, ProExpiration};
 /// The account settings, only accessible if you're logged in as the user.
 ///
 /// Only accessible if you're logged in as the user.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[serde(deny_unknown_fields)]
 pub struct AccountSettings {

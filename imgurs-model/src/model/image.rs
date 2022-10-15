@@ -1,10 +1,8 @@
 //! Image specification
 
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use time::{serde::timestamp, OffsetDateTime};
 use url::Url;
-
-use crate::serialization::unix_epoch;
 
 /// The base model for an image.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -16,8 +14,8 @@ pub struct Image {
     /// Bandwidth consumed by the image in bytes
     pub bandwidth: u64,
     /// Time uploaded, epoch time
-    #[serde(with = "unix_epoch")]
-    pub datetime: DateTime<Utc>,
+    #[serde(with = "timestamp")]
+    pub datetime: OffsetDateTime,
     /// OPTIONAL, the deletehash, if you're logged in as the image owner
     pub deletehash: Option<String>,
     /// Description of the image.
