@@ -25,9 +25,9 @@ pub async fn parse_response_or_error<T: DeserializeOwned>(
     #[cfg(feature = "tracing")]
     let val = {
         let text = res.text().await?;
-        // let text = pretty_json(&text).unwrap();
+        let text = pretty_json(&text).unwrap();
         tracing::debug!("Body: {}", text);
-        // println!("Body: {}", text);
+        println!("Body: {}", text);
         serde_json::from_str(&text)?
     };
     #[cfg(not(feature = "tracing"))]
