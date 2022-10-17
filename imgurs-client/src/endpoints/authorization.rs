@@ -2,17 +2,15 @@
 use crate::{
     client::{AuthenticatedClient, BasicClient},
     error::ClientError,
-    response::Response,
+    response::{parse_response_or_error, Response},
     traits::{Client, RegisteredClient},
 };
 use async_trait::async_trait;
-use imgurs_model::model::{
-    authorization::{AuthorizationCode, AuthorizationResponse, PINCode, RefreshResponse},
-    basic::{Basic, Data},
+use imgurs_model::model::authorization::{
+    AuthorizationCode, AuthorizationResponse, PINCode, RefreshResponse,
 };
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use time::{Duration, OffsetDateTime};
-use tracing::debug;
 use url::Url;
 
 /// Client authorization API endpoint
@@ -47,40 +45,6 @@ impl Method {
             Method::Token => "token",
             Method::Pin => "pin",
         }
-    }
-}
-
-async fn parse_response_or_error<T: DeserializeOwned>(
-    res: reqwest::Response,
-) -> Result<Response<T>, ClientError> {
-    let status = res.status();
-    let headers = res.headers().clone();
-
-    let text = res.text().await?;
-
-    debug!("Body: {}", text);
-
-    // Parse for a T
-    let val = serde_json::from_str(&text);
-
-    // If correct return Response with AuthorizationResponse
-    if let Ok(val) = val {
-        Ok(Response {
-            content: Basic {
-                data: Data::Content(val),
-                success: status.is_success(),
-                status: status.as_u16(),
-            },
-            headers,
-        })
-    } else {
-        // Parse for a BasicData
-        serde_json::from_str(&text)
-            .map(|data| Response {
-                content: data,
-                headers,
-            })
-            .map_err(Into::into)
     }
 }
 

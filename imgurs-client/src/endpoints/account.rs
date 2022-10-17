@@ -13,7 +13,7 @@ use imgurs_model::model::{
 use crate::{
     client::{AuthenticatedClient, BasicClient, SortPreference},
     error::ClientError,
-    response::Response,
+    response::{parse_response_or_error, Response},
     traits::{Client, RegisteredClient},
 };
 
@@ -205,10 +205,7 @@ pub trait AccountRegisteredClient: AccountClient + RegisteredClient {
             .send()
             .await?;
 
-        let headers = res.headers().clone();
-        let content = res.json().await?;
-
-        Ok(Response { content, headers })
+        parse_response_or_error(res).await
     }
 
     /// Get images of the current user
@@ -251,11 +248,7 @@ pub trait AccountRegisteredClient: AccountClient + RegisteredClient {
             .send()
             .await?;
 
-        let headers = res.headers().clone();
-        println!("{:?}", headers);
-        let content = res.json().await?;
-
-        Ok(Response { content, headers })
+        parse_response_or_error(res).await
     }
 
     /// Account submissions
@@ -281,10 +274,7 @@ pub trait AccountRegisteredClient: AccountClient + RegisteredClient {
             .send()
             .await?;
 
-        let headers = res.headers().clone();
-        let content = res.json().await?;
-
-        Ok(Response { content, headers })
+        parse_response_or_error(res).await
     }
 }
 

@@ -2,20 +2,17 @@
 
 use async_trait::async_trait;
 
-use imgurs_model::{
-    model::{
-        album::AlbumID,
-        gallery_album::GalleryAlbum,
-        gallery_image::{GalleryImage, GalleryImageID},
-        gallery_tags::GalleryTags,
-    },
-    utilities::pretty_json,
+use imgurs_model::model::{
+    album::AlbumID,
+    gallery_album::GalleryAlbum,
+    gallery_image::{GalleryImage, GalleryImageID},
+    gallery_tags::GalleryTags,
 };
 
 use crate::{
     client::{AuthenticatedClient, BasicClient},
     error::ClientError,
-    response::Response,
+    response::{parse_response_or_error, Response},
     traits::{Client, RegisteredClient},
 };
 
@@ -39,10 +36,7 @@ pub trait GalleryClient: Client {
             .send()
             .await?;
 
-        let headers = res.headers().clone();
-        let content = res.json().await?;
-
-        Ok(Response { content, headers })
+        parse_response_or_error(res).await
     }
 
     /// Gallery image
@@ -62,17 +56,7 @@ pub trait GalleryClient: Client {
             .send()
             .await?;
 
-        let headers = res.headers().clone();
-        println!("{:#?}", headers);
-
-        let text = res.text().await?;
-        println!("{}", text);
-        println!("{}", pretty_json(&text)?);
-
-        let content = serde_json::from_str(&text)?;
-        // let content = res.json().await?;
-
-        Ok(Response { content, headers })
+        parse_response_or_error(res).await
     }
 
     /// Gallery image
@@ -86,17 +70,7 @@ pub trait GalleryClient: Client {
             .send()
             .await?;
 
-        let headers = res.headers().clone();
-        println!("{:#?}", headers);
-
-        let text = res.text().await?;
-        println!("{}", text);
-        println!("{}", pretty_json(&text)?);
-
-        let content = serde_json::from_str(&text)?;
-        // let content = res.json().await?;
-
-        Ok(Response { content, headers })
+        parse_response_or_error(res).await
     }
 }
 
@@ -124,7 +98,7 @@ mod tests {
             .content
             .result()
             .unwrap();
-        println!("{:#?}", res);
+        println!("RESULT: {:#?}", res);
     }
 
     // TODO: Enable test once I get a correct response/good hash
