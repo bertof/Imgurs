@@ -34,14 +34,12 @@ pub enum CustomGalleryItem {
 
 #[cfg(test)]
 mod test {
-    use std::error::Error;
 
-    use crate::model::basic::Basic;
-    use crate::model::custom_gallery::CustomGallery;
+    use crate::model::{basic::Basic, custom_gallery::CustomGallery};
 
     // TODO: use a better example
     #[test]
-    fn test_deserialize_custom_gallery_local() -> Result<(), Box<dyn Error>> {
+    fn test_deserialize_custom_gallery_local() {
         let res = r#"{
             "data": {
                 "link": "https://imgur.com/g/wRBsA",
@@ -53,11 +51,7 @@ mod test {
             "success": true,
             "status": 200
         }"#;
-
-        let data = serde_json::from_str::<Basic<CustomGallery>>(res)?;
-
+        let data = serde_json::from_str::<Basic<CustomGallery>>(res).unwrap();
         println!("{:#?}", data);
-
-        Ok(())
     }
 }

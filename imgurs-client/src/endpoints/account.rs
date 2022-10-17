@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use imgurs_model::model::{
     account::{Account, AccountBlocks, BlockedStatus},
     basic::{Basic, Data},
-    common::Username,
+    common::{AccountID, Username},
     custom_gallery::CustomGalleryItem,
 };
 
@@ -37,18 +37,21 @@ pub trait AccountClient: Client {
         Ok(Response { content, headers })
     }
 
-    // /// Get account by user id
-    // async fn get_account_by_id(&self, _user_id: AccountID) -> Result<serde_json::Value, ClientError> {
-    //     unimplemented!()
-    //
-    //     // TODO: can't get how to implement it. Unclear API documentation.
-    //     // self.get_client()
-    //     //     .get(&format!("https://api.imgur.com/3/account/{}?user_id=True", user_id))
-    //     //     .headers(self.get_headers()?)
-    //     //     .send().await?
-    //     //     .json::<serde_json::Value>().await
-    //     //     .map_err(Into::into)
-    // }
+    /// Get account by user id
+    async fn get_account_by_id(
+        &self,
+        _user_id: AccountID,
+    ) -> Result<Response<Account>, ClientError> {
+        unimplemented!()
+
+        // TODO: can't get how to implement it. Unclear API documentation.
+        // self.get_client()
+        //     .get(&format!("https://api.imgur.com/3/account/{}?user_id=True", user_id))
+        //     .headers(self.get_headers()?)
+        //     .send().await?
+        //     .json::<serde_json::Value>().await
+        //     .map_err(Into::into)
+    }
 
     /// Get account block status
     async fn get_account_block_status(
@@ -294,75 +297,62 @@ impl AccountRegisteredClient for AuthenticatedClient {}
 #[cfg(test)]
 mod tests {
     use crate::{
-        client::BasicClient,
         endpoints::{
             account::{AccountClient, AccountRegisteredClient},
             authorization::AuthenticationRegisteredClient,
         },
+        test_utils::*,
     };
-    use imgurs_model::model::authorization::{AccessToken, ClientID, ClientSecret, RefreshToken};
-    use std::{convert::TryFrom, env, error::Error};
-    use time::OffsetDateTime;
 
     #[tokio::test]
-    async fn test_get_account_by_username() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
-        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
-        let client = BasicClient::new(client_id, client_secret)?;
+    async fn test_get_account_by_username() {
+        let client = get_basic_client().unwrap();
         let res = client
             .get_account_by_username("bertof".into())
-            .await?
+            .await
+            .unwrap()
             .content
-            .result()?;
+            .result()
+            .unwrap();
 
         println!("{:#?}", res);
         assert_eq!(&res.url, "bertof");
         assert_eq!(res.id.to_string(), "57420253");
-
-        Ok(())
     }
 
     // TODO: enable test once method is implemented
-    /*#[tokio::test]
-    async fn test_get_account_by_user_id() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::from_default_env()??;
-        let client_secret = ClientSecret::from_default_env()??;
-        let client = BasicClient::new(client_id, client_secret)?;
-        let res = client
-            .get_account_by_id(57420253).await?;
-
-        println!("{:#?}", res);
-
-        Ok(())
-    }*/
-
+    #[ignore = "Unimplemented"]
     #[tokio::test]
-    async fn test_get_account_block_status() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
-        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
-        let client = BasicClient::new(client_id, client_secret)?;
-        let res = client.get_account_block_status("bertof").await?;
-
+    async fn test_get_account_by_user_id() {
+        let client = get_basic_client().unwrap();
+        let res = client
+            .get_account_by_id(57420253)
+            .await
+            .unwrap()
+            .content
+            .result()
+            .unwrap();
         println!("{:#?}", res);
-
-        Ok(())
     }
 
     #[tokio::test]
-    async fn test_blocks() -> Result<(), Box<dyn Error>> {
+    async fn test_get_account_block_status() {
+        let client = get_basic_client().unwrap();
+        let res = client.get_account_block_status("bertof").await.unwrap();
+        println!("{:#?}", res);
+    }
+
+    #[tokio::test]
+    async fn test_blocks() {
         // Sorry RansackThaElder, needed a test user ☺
         // let target_user = "RansackThaElder".to_string();
 
-        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
-        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
-        let access_token = AccessToken::try_from(env::var("ACCESS_TOKEN")?)?;
-        let refresh_token = RefreshToken::try_from(env::var("REFRESH_TOKEN")?)?;
-        let client = BasicClient::new(client_id, client_secret)?
-            .with_tokens(access_token, refresh_token, OffsetDateTime::now_utc())?
+        let client = get_authenticated_client()
+            .unwrap()
             .with_fresh_tokens()
-            .await?;
-
-        let res = client.get_account_blocks().await?.result()?;
+            .await
+            .unwrap();
+        let res = client.get_account_blocks().await.unwrap().result().unwrap();
         println!("{:#?}", res);
         assert!(res.items.is_empty());
         assert_eq!(res.next, None);
@@ -394,93 +384,75 @@ mod tests {
         //     .get_account_blocks()
         //     .await?;
         // println!("{:#?}", res);
-
-        Ok(())
     }
 
     #[tokio::test]
-    async fn test_get_account_images() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
-        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
-        let access_token = AccessToken::try_from(env::var("ACCESS_TOKEN")?)?;
-        let refresh_token = RefreshToken::try_from(env::var("REFRESH_TOKEN")?)?;
-        let client = BasicClient::new(client_id, client_secret)?
-            .with_tokens(access_token, refresh_token, OffsetDateTime::now_utc())?
+    async fn test_get_account_images() {
+        let client = get_authenticated_client()
+            .unwrap()
             .with_fresh_tokens()
-            .await?;
-
-        let res = client.get_user_account_images().await?.content.result()?;
-
+            .await
+            .unwrap();
+        let res = client
+            .get_user_account_images()
+            .await
+            .unwrap()
+            .content
+            .result()
+            .unwrap();
         println!("{:#?}", res);
-
-        Ok(())
     }
 
     // TODO: enable test once parsing is corrected
     #[ignore]
     #[tokio::test]
-    async fn test_get_account_gallery_favorites() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
-        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
-        let access_token = AccessToken::try_from(env::var("ACCESS_TOKEN")?)?;
-        let refresh_token = RefreshToken::try_from(env::var("REFRESH_TOKEN")?)?;
-        let client = BasicClient::new(client_id, client_secret)?
-            .with_tokens(access_token, refresh_token, OffsetDateTime::now_utc())?
+    async fn test_get_account_gallery_favorites() {
+        let client = get_authenticated_client()
+            .unwrap()
             .with_fresh_tokens()
-            .await?;
-
+            .await
+            .unwrap();
         let res = client
             .get_user_gallery_favorites(None, None)
-            .await?
+            .await
+            .unwrap()
             .content
-            .result()?;
-
+            .result()
+            .unwrap();
         println!("{:#?}", res);
-
-        Ok(())
     }
 
     #[tokio::test]
-    async fn test_get_account_favorites() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
-        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
-        let access_token = AccessToken::try_from(env::var("ACCESS_TOKEN")?)?;
-        let refresh_token = RefreshToken::try_from(env::var("REFRESH_TOKEN")?)?;
-        let client = BasicClient::new(client_id, client_secret)?
-            .with_tokens(access_token, refresh_token, OffsetDateTime::now_utc())?
+    async fn test_get_account_favorites() {
+        let client = get_authenticated_client()
+            .unwrap()
             .with_fresh_tokens()
-            .await?;
-
+            .await
+            .unwrap();
         let res = client
             .get_user_favorites(Some(0), None)
-            .await?
+            .await
+            .unwrap()
             .content
-            .result()?;
-
-        println!("{:#?}", res);
-
-        Ok(())
+            .result()
+            .unwrap();
+        println!("{:#}", res);
     }
 
     #[tokio::test]
-    async fn test_get_account_submissions() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
-        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
-        let access_token = AccessToken::try_from(env::var("ACCESS_TOKEN")?)?;
-        let refresh_token = RefreshToken::try_from(env::var("REFRESH_TOKEN")?)?;
-        let client = BasicClient::new(client_id, client_secret)?
-            .with_tokens(access_token, refresh_token, OffsetDateTime::now_utc())?
+    async fn test_get_account_submissions() {
+        let client = get_authenticated_client()
+            .unwrap()
             .with_fresh_tokens()
-            .await?;
-
+            .await
+            .unwrap();
         let res = client
             .get_user_submissions(Some(0), None)
-            .await?
+            .await
+            .unwrap()
             .content
-            .result()?;
-
-        println!("{:#?}", res);
-
-        Ok(())
+            .result()
+            .unwrap();
+        println!("{:#}", res);
     }
 }

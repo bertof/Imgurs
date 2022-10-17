@@ -54,18 +54,12 @@ pub struct GalleryTags {
 
 #[cfg(test)]
 pub mod tests {
-    use std::error::Error;
 
-    use crate::{
-        model::{basic::Basic, gallery_tags::GalleryTags},
-        utilities::pretty_json,
-    };
+    use crate::model::{basic::Basic, gallery_tags::GalleryTags};
 
     #[test]
-    fn parse_gallery_tags() -> Result<(), Box<dyn Error>> {
-        let response = {
-            r#"
-{
+    fn parse_gallery_tags() {
+        let response = r#"{
     "data": {
         "tags": [
             {
@@ -4192,11 +4186,8 @@ pub mod tests {
     },
     "success": true,
     "status": 200
-}"#
-        };
-        println!("{}", pretty_json(response)?);
+}"#;
         let gallery_tags = serde_json::from_str::<Basic<GalleryTags>>(response);
         println!("{:#?}", gallery_tags);
-        Ok(())
     }
 }

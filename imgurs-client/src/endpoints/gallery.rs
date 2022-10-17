@@ -112,43 +112,33 @@ impl GalleryRegisteredClient for AuthenticatedClient {}
 
 #[cfg(test)]
 mod tests {
-    use crate::{client::BasicClient, endpoints::gallery::GalleryClient};
-    use imgurs_model::model::authorization::{ClientID, ClientSecret};
-    use std::{convert::TryFrom, env, error::Error};
+    use crate::{endpoints::gallery::GalleryClient, test_utils::*};
 
     #[tokio::test]
-    async fn test_deserialize_gallery_album_remote() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
-        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
-        let client = BasicClient::new(client_id, client_secret)?;
-
+    async fn test_deserialize_gallery_album_remote() {
+        let client = get_basic_client().unwrap();
         let res = client
             .get_gallery_album(&"HvCcoNA".into())
-            .await?
+            .await
+            .unwrap()
             .content
-            .result()?;
-
+            .result()
+            .unwrap();
         println!("{:#?}", res);
-
-        Ok(())
     }
 
     // TODO: Enable test once I get a correct response/good hash
-    #[ignore]
+    #[ignore = "Wrong implementation"]
     #[tokio::test]
-    async fn test_deserialize_gallery_image_remote() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
-        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
-        let client = BasicClient::new(client_id, client_secret)?;
-
+    async fn test_deserialize_gallery_image_remote() {
+        let client = get_basic_client().unwrap();
         let res = client
             .get_gallery_image(&"MDCEW6Q".into())
-            .await?
+            .await
+            .unwrap()
             .content
-            .result()?;
-
+            .result()
+            .unwrap();
         println!("{:#?}", res);
-
-        Ok(())
     }
 }

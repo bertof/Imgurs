@@ -94,11 +94,10 @@ mod test {
         basic::Basic,
         common::ProExpiration,
     };
-    use std::error::Error;
     use time::macros::datetime;
 
     #[test]
-    fn test_deserialize_account_local() -> Result<(), Box<dyn Error>> {
+    fn test_deserialize_account_local() {
         let data = r#"{
           "data": {
             "id": 48437714,
@@ -121,7 +120,10 @@ mod test {
           "status": 200
         }
         "#;
-        let account = serde_json::from_str::<Basic<Account>>(data)?.result()?;
+        let account = serde_json::from_str::<Basic<Account>>(data)
+            .unwrap()
+            .result()
+            .unwrap();
         println!("{:#?}", account);
         assert_eq!(account.id, 48437714);
         assert_eq!(account.url, "ghostinspector");
@@ -142,6 +144,5 @@ mod test {
         assert_eq!(account.pro_expiration, ProExpiration::Bool(false));
         assert_eq!(account.user_follow, UserFollow { status: false });
         assert!(!account.is_blocked);
-        Ok(())
     }
 }

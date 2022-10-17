@@ -47,15 +47,12 @@ pub struct Trophy {
 
 #[cfg(test)]
 mod test {
-    use std::error::Error;
 
-    use crate::model::basic::Basic;
-    use crate::model::gallery_profile::GalleryProfile;
+    use crate::model::{basic::Basic, gallery_profile::GalleryProfile};
 
     #[test]
-    fn test_deserialize_gallery_profile_local() -> Result<(), Box<dyn Error>> {
-        let res = {
-            r#"{
+    fn test_deserialize_gallery_profile_local() {
+        let res = r#"{
             "data": {
                 "total_gallery_comments": 40,
                 "total_gallery_likes": 23,
@@ -75,13 +72,8 @@ mod test {
             },
             "success": true,
             "status": 200
-        }"#
-        };
-
-        let data = serde_json::from_str::<Basic<GalleryProfile>>(res)?;
-
+        }"#;
+        let data = serde_json::from_str::<Basic<GalleryProfile>>(res).unwrap();
         println!("{:#?}", data);
-
-        Ok(())
     }
 }

@@ -209,121 +209,106 @@ impl fmt::Display for SortPreference {
 
 #[cfg(test)]
 mod tests {
+    use crate::{test_utils::*, traits::Client};
     use imgurs_model::{
         error::ErrorMessage,
         model::{
             account::Account,
             account_settings::AccountSettings,
             album::Album,
-            authorization::{ClientID, ClientSecret},
             basic::{Basic, Data, Method},
             comment::Comment,
         },
     };
     use reqwest::StatusCode;
-    use std::{convert::TryFrom, env, error::Error};
-
-    use crate::{client::BasicClient, traits::Client};
 
     #[tokio::test]
-    async fn test_deserialize_account_remote() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
-        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
-        let client = BasicClient::new(client_id, client_secret)?;
-
+    async fn test_deserialize_account_remote() {
+        let client = get_basic_client().unwrap();
         let account = client
             .get_client()
             .get("https://api.imgur.com/3/account/ghostinspector")
             .send()
-            .await?
+            .await
+            .unwrap()
             .json::<Basic<Account>>()
-            .await?;
-
+            .await
+            .unwrap();
         println!("{:#?}", account);
-
-        Ok(())
     }
 
     #[tokio::test]
-    async fn test_deserialize_album_remote() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
-        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
-        let client = BasicClient::new(client_id, client_secret)?;
-
+    async fn test_deserialize_album_remote() {
+        let client = get_basic_client().unwrap();
         let data = client
             .get_client()
             .get("https://api.imgur.com/3/album/z6B0j")
             .send()
-            .await?
+            .await
+            .unwrap()
             .json::<Basic<Album>>()
             .await
             .unwrap()
             .result()
             .unwrap();
-
         println!("{:#?}", data);
-
-        Ok(())
     }
 
     #[tokio::test]
-    async fn test_deserialize_comment_remote() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
-        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
-        let client = BasicClient::new(client_id, client_secret)?;
-
+    async fn test_deserialize_comment_remote() {
+        let client = get_basic_client().unwrap();
         let data = client
             .get_client()
             .get("https://api.imgur.com/3/comment/1938633683")
             .send()
-            .await?
+            .await
+            .unwrap()
             .json::<Basic<Comment>>()
             .await
             .unwrap()
             .result()
             .unwrap();
-
         println!("{:#?}", data);
-
-        Ok(())
     }
 
     #[ignore]
     #[tokio::test]
-    async fn test_deserialize_account_settings_remote() -> Result<(), Box<dyn Error>> {
+    async fn test_deserialize_account_settings_remote() {
         unimplemented!()
     }
 
     #[ignore]
     #[tokio::test]
-    async fn test_deserialize_conversation_remote() -> Result<(), Box<dyn Error>> {
+    async fn test_deserialize_conversation_remote() {
         unimplemented!()
     }
 
     #[ignore]
     #[tokio::test]
-    async fn test_deserialize_custom_gallery_remote() -> Result<(), Box<dyn Error>> {
+    async fn test_deserialize_custom_gallery_remote() {
         unimplemented!()
     }
 
     #[ignore]
     #[tokio::test]
-    async fn test_deserialize_gallery_image_remote() -> Result<(), Box<dyn Error>> {
+    async fn test_deserialize_gallery_image_remote() {
         unimplemented!()
     }
 
     #[ignore]
     #[tokio::test]
-    async fn test_deserialize_gallery_profile_remote() -> Result<(), Box<dyn Error>> {
+    async fn test_deserialize_gallery_profile_remote() {
         unimplemented!()
     }
 
     #[tokio::test]
-    async fn test_error_parsing_remote() -> Result<(), Box<dyn Error>> {
-        let res = reqwest::get("https://api.imgur.com/3/account/me/settings").await?;
-        assert_eq!(res.status(), StatusCode::from_u16(401)?);
+    async fn test_error_parsing_remote() {
+        let res = reqwest::get("https://api.imgur.com/3/account/me/settings")
+            .await
+            .unwrap();
+        assert_eq!(res.status(), StatusCode::from_u16(401).unwrap());
 
-        let data = res.json::<Basic<AccountSettings>>().await?;
+        let data = res.json::<Basic<AccountSettings>>().await.unwrap();
         assert!(!data.success);
         assert_eq!(data.status, 401);
         match data.data {
@@ -338,7 +323,5 @@ mod tests {
                 assert_eq!(method, Method::GET);
             }
         }
-
-        Ok(())
     }
 }

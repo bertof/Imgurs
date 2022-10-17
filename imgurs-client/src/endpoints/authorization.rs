@@ -209,99 +209,85 @@ impl AuthenticationRegisteredClient for AuthenticatedClient {}
 #[cfg(test)]
 mod tests {
     use crate::{
-        client::BasicClient,
         endpoints::authorization::{AuthenticationClient, AuthenticationRegisteredClient, Method},
+        test_utils::*,
     };
-    use imgurs_model::model::authorization::{
-        AccessToken, AuthorizationCode, ClientID, ClientSecret, PINCode, RefreshToken,
-    };
-    use std::{convert::TryFrom, env, error::Error};
-    use time::OffsetDateTime;
+    use imgurs_model::model::authorization::{AuthorizationCode, PINCode};
 
     #[test]
-    fn test_get_authentication_url_with_authorization_code() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
-        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
-        let client = BasicClient::new(client_id, client_secret)?;
-        let res = client.get_authentication_url(Method::AuthorizationCode, None)?;
-        println!("{:?}", res);
-        Ok(())
+    fn test_get_authentication_url_with_authorization_code() {
+        let client = get_basic_client().unwrap();
+        let res = client
+            .get_authentication_url(Method::AuthorizationCode, None)
+            .unwrap();
+        println!("Authentication URL with authorization code: {}", res);
     }
 
     #[test]
-    fn test_get_authentication_url_with_pin_code() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
-        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
-        let client = BasicClient::new(client_id, client_secret)?;
-        let res = client.get_authentication_url(Method::Pin, None)?;
-        println!("{:?}", res);
-        Ok(())
+    fn test_get_authentication_url_with_pin_code() {
+        let client = get_basic_client().unwrap();
+        let res = client.get_authentication_url(Method::Pin, None).unwrap();
+        println!("Authentication URL with pin code: {}", res);
     }
 
     #[test]
-    fn test_get_authentication_url_with_token() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
-        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
-        let client = BasicClient::new(client_id, client_secret)?;
-        let res = client.get_authentication_url(Method::Token, None)?;
-        println!("{:?}", res);
-        Ok(())
+    fn test_get_authentication_url_with_token() {
+        let client = get_basic_client().unwrap();
+        let res = client.get_authentication_url(Method::Token, None).unwrap();
+        println!("Authentication URL with token: {}", res);
     }
 
     #[test]
-    fn test_get_authentication_url_with_state() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
-        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
-        let client = BasicClient::new(client_id, client_secret)?;
-        let res =
-            client.get_authentication_url(Method::AuthorizationCode, Some("Example state"))?;
-        println!("{:?}", res);
-        Ok(())
+    fn test_get_authentication_url_with_state() {
+        let client = get_basic_client().unwrap();
+        let res = client
+            .get_authentication_url(Method::AuthorizationCode, Some("Example state"))
+            .unwrap();
+        println!("Authentication URL with state: {}", res);
     }
 
-    #[ignore]
+    #[ignore = "Can be run once per authorization code"]
     #[tokio::test]
-    async fn test_consume_authorization_code() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
-        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
-        let client = BasicClient::new(client_id, client_secret)?;
-        let authorization_code = AuthorizationCode::try_from(env::var("REFRESH_TOKEN")?)?;
+    async fn test_consume_authorization_code() {
+        let client = get_basic_client().unwrap();
+        let authorization_code =
+            AuthorizationCode::try_from(env::var("AUTHORIZATION_CODE").unwrap()).unwrap();
         let res = client
             .authorization_by_authorization_code(authorization_code)
-            .await?;
-        println!("{:?}", res);
-        Ok(())
+            .await
+            .unwrap()
+            .content
+            .result()
+            .unwrap();
+        println!("{:#?}", res);
     }
 
-    #[ignore]
+    #[ignore = "Can be run once per pin code"]
     #[tokio::test]
-    async fn test_consume_pin_code() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
-        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
-        let client = BasicClient::new(client_id, client_secret)?;
-        let pin_code = PINCode::try_from(env::var("PIN_CODE")?)?;
+    async fn test_consume_pin_code() {
+        let client = get_basic_client().unwrap();
+        let pin_code = PINCode::try_from(env::var("PIN_CODE").unwrap()).unwrap();
         println!("{:?}", pin_code);
-        let res = client.authorization_by_pin_code(pin_code).await?;
-        println!("{:?}", res);
-        assert!(res.content.result().is_ok());
-        Ok(())
+        let res = client
+            .authorization_by_pin_code(pin_code)
+            .await
+            .unwrap()
+            .content
+            .result()
+            .unwrap();
+        println!("{:#?}", res);
     }
 
     #[tokio::test]
-    async fn test_refresh_token() -> Result<(), Box<dyn Error>> {
-        let client_id = ClientID::try_from(env::var("CLIENT_ID")?)?;
-        let client_secret = ClientSecret::try_from(env::var("CLIENT_SECRET")?)?;
-        let access_token = AccessToken::try_from(env::var("ACCESS_TOKEN")?)?;
-        let refresh_token = RefreshToken::try_from(env::var("REFRESH_TOKEN")?)?;
-        let client = BasicClient::new(client_id, client_secret)?.with_tokens(
-            access_token,
-            refresh_token,
-            OffsetDateTime::now_utc(),
-        )?;
-        let res = client.refresh_token().await?;
+    async fn test_refresh_token() {
+        let client = get_authenticated_client().unwrap();
+        let res = client
+            .refresh_token()
+            .await
+            .unwrap()
+            .content
+            .result()
+            .unwrap();
         println!("{:?}", res);
-        assert!(res.content.result().is_ok());
-
-        Ok(())
     }
 }

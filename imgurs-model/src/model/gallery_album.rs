@@ -87,12 +87,11 @@ pub struct GalleryAlbum {
 
 #[cfg(test)]
 mod test {
-    use std::error::Error;
 
     use crate::model::{basic::Basic, gallery_album::GalleryAlbum};
 
     #[test]
-    fn test_deserialize_gallery_album_local() -> Result<(), Box<dyn Error>> {
+    fn test_deserialize_gallery_album_local() {
         let res = r#"{
           "data": {
             "account_id": 67659037,
@@ -252,11 +251,7 @@ mod test {
           "status": 200,
           "success": true
         }"#;
-
-        let data = serde_json::from_str::<Basic<GalleryAlbum>>(res)?;
-
+        let data = serde_json::from_str::<Basic<GalleryAlbum>>(res).unwrap();
         println!("{:#?}", data);
-
-        Ok(())
     }
 }

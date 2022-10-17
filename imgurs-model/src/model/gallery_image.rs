@@ -115,13 +115,11 @@ pub struct GalleryImage {
 
 #[cfg(test)]
 mod test {
-    use std::error::Error;
 
-    use crate::model::basic::Basic;
-    use crate::model::gallery_image::GalleryImage;
+    use crate::model::{basic::Basic, gallery_image::GalleryImage};
 
     #[test]
-    fn test_deserialize_gallery_image_local() -> Result<(), Box<dyn Error>> {
+    fn test_deserialize_gallery_image_local() {
         let res = r#"{
             "data": {
                 "id": "OUHDm",
@@ -149,11 +147,7 @@ mod test {
             "success" : true,
             "status" : 200
         }"#;
-
-        let data = serde_json::from_str::<Basic<GalleryImage>>(res)?;
-
+        let data = serde_json::from_str::<Basic<GalleryImage>>(res).unwrap();
         println!("{:#?}", data);
-
-        Ok(())
     }
 }

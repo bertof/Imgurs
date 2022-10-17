@@ -54,10 +54,9 @@ mod test {
         basic::Basic,
         common::ProExpiration,
     };
-    use std::error::Error;
 
     #[test]
-    fn test_deserialize_account_settings_local() -> Result<(), Box<dyn Error>> {
+    fn test_deserialize_account_settings_local() {
         let data = r#"{
             "data": {
                 "email": "josh@imgur.com",
@@ -77,7 +76,10 @@ mod test {
             "success": true,
             "status": 200
         }"#;
-        let account_settings = serde_json::from_str::<Basic<AccountSettings>>(data)?.result()?;
+        let account_settings = serde_json::from_str::<Basic<AccountSettings>>(data)
+            .unwrap()
+            .result()
+            .unwrap();
         println!("{:#?}", account_settings);
         assert_eq!(account_settings.email, "josh@imgur.com");
         assert!(!account_settings.public_images);
@@ -95,6 +97,5 @@ mod test {
         );
         assert!(!account_settings.show_mature);
         assert!(account_settings.first_party);
-        Ok(())
     }
 }

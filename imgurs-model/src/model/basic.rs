@@ -85,15 +85,13 @@ pub enum Method {
 
 #[cfg(test)]
 mod test {
-    use std::error::Error;
-
     use crate::model::{
         account_settings::AccountSettings,
         basic::{Basic, Data, ErrorMessage, Method},
     };
 
     #[test]
-    fn test_error_parsing_local() -> Result<(), Box<dyn Error>> {
+    fn test_error_parsing_local() {
         let res = r#"{
             "data": {
                 "error": "Authentication required",
@@ -104,7 +102,7 @@ mod test {
             "status": 401
         }"#;
 
-        let data = serde_json::from_str::<Basic<AccountSettings>>(res)?;
+        let data = serde_json::from_str::<Basic<AccountSettings>>(res).unwrap();
         assert!(!data.success);
         assert_eq!(data.status, 401);
         match data.data {
@@ -119,7 +117,5 @@ mod test {
                 assert_eq!(method, Method::GET);
             }
         }
-
-        Ok(())
     }
 }
