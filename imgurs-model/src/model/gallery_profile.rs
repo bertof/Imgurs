@@ -51,7 +51,7 @@ mod test {
     use crate::model::{basic::Basic, gallery_profile::GalleryProfile};
 
     #[test]
-    fn test_deserialize_gallery_profile_local() {
+    fn test_deserialize_gallery_profile_example() {
         let res = r#"{
             "data": {
                 "total_gallery_comments": 40,

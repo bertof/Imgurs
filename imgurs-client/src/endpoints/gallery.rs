@@ -1,19 +1,17 @@
 //! Gallery API implementation
 
-use async_trait::async_trait;
-
-use imgurs_model::model::{
-    album::AlbumID,
-    gallery_album::GalleryAlbum,
-    gallery_image::{GalleryImage, GalleryImageID},
-    gallery_tags::GalleryTags,
-};
-
 use crate::{
     client::{AuthenticatedClient, BasicClient},
     error::ClientError,
     response::{parse_response_or_error, Response},
     traits::{Client, RegisteredClient},
+};
+use async_trait::async_trait;
+use imgurs_model::model::{
+    album::AlbumID,
+    gallery_album::GalleryAlbum,
+    gallery_image::{GalleryImage, GalleryImageID},
+    gallery_tags::GalleryTags,
 };
 
 /// Gallery API client

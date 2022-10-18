@@ -14,7 +14,7 @@ pub struct Image {
     /// The ID for the image
     pub id: String,
     /// The title of the image.
-    pub title: String,
+    pub title: Option<String>,
     /// Description of the image.
     pub description: Option<String>,
     /// Time uploaded, epoch time
@@ -42,7 +42,7 @@ pub struct Image {
     /// If the image has been categorized by our backend then this will contain the section the image belongs in. (funny, cats, adviceanimals, wtf, etc)
     pub section: Option<String>,
     /// The direct link to the the image. (Note: if fetching an animated GIF that was over 20MB in original size, a .gif thumbnail will be returned)
-    pub link: Url,
+    pub link: Option<Url>,
     /// OPTIONAL, The .gifv link. Only available if the image is animated and type is 'image/gif'.
     pub gifv: Option<Url>,
     /// OPTIONAL, The direct link to the .mp4. Only available if the image is animated and type is 'image/gif'.
@@ -52,13 +52,13 @@ pub struct Image {
     /// OPTIONAL, Whether the image has a looping animation. Only available if the image is animated and type is 'image/gif'.
     pub looping: Option<bool>,
     /// Indicates if the current user favorited the image. Defaults to false if not signed in.
-    pub favorite: bool,
+    pub favorite: Option<bool>,
     /// Indicates if the image has been marked as nsfw or not. Defaults to null if information is not available.
     pub nsfw: Option<bool>,
     /// The current user's vote on the album. null if not signed in or if the user hasn't voted on it.
     pub vote: Option<String>,
     /// True if the image has been submitted to the gallery, false if otherwise.
-    in_gallery: bool,
+    in_gallery: Option<bool>,
 
     /// Other fields that are missing from the API model
     #[serde(flatten)]
@@ -71,52 +71,28 @@ mod test {
     use time::macros::datetime;
 
     #[test]
-    fn test_deserialize_image_local() {
-        let res_data = r#"{
-            "id": "1nneRbX",
-            "title": "DOOGLE",
-            "description": "Doogle",
-            "datetime": 1515221708,
-            "type": "image/png",
-            "animated": false,
-            "width": 1279,
-            "height": 717,
-            "size": 379024,
-            "views": 8705,
-            "bandwidth": 3299403920,
-            "vote": null,
-            "favorite": false,
-            "nsfw": null,
-            "section": null,
-            "account_url": null,
-            "account_id": null,
-            "is_ad": false,
-            "in_most_viral": false,
-            "has_sound": false,
-            "tags": [],
-            "ad_type": 0,
-            "ad_url": "",
-            "edited": "0",
-            "in_gallery": false,
-            "link": "https://i.imgur.com/1nneRbX.png"
-          }"#;
+    fn test_deserialize_image_example() {
+        let res_data = include_str!("../../model_data/image.example.json");
         let image = serde_json::from_str::<Image>(res_data).unwrap();
         println!("{:#?}", image);
-        assert_eq!(image.id, "1nneRbX");
-        assert_eq!(image.title, "DOOGLE");
-        assert_eq!(image.description, Some("Doogle".to_string()));
-        assert_eq!(image.datetime, datetime!(2018-01-06 6:55:08.0 UTC));
-        assert_eq!(image.mime_type, "image/png".to_string());
+        assert_eq!(image.id, "SbBGk");
+        assert_eq!(image.title, None);
+        assert_eq!(image.description, None);
+        assert_eq!(image.datetime, datetime!(2012-07-06 0:06:33.0 UTC));
+        assert_eq!(image.mime_type, "image/jpeg");
         assert!(!image.animated);
-        assert_eq!(image.width, 1279);
-        assert_eq!(image.height, 717);
-        assert_eq!(image.size, 379024);
-        assert_eq!(image.views, 8705);
-        assert_eq!(image.bandwidth, 3299403920);
+        assert_eq!(image.width, 2559);
+        assert_eq!(image.height, 1439);
+        assert_eq!(image.size, 521916);
+        assert_eq!(image.views, 1);
+        assert_eq!(image.bandwidth, 521916);
         assert_eq!(image.vote, None);
-        assert!(!image.favorite);
+        assert_eq!(image.favorite, None);
         assert_eq!(image.nsfw, None);
         assert_eq!(image.section, None);
-        assert_eq!(image.link.to_string(), "https://i.imgur.com/1nneRbX.png");
+        assert_eq!(
+            image.link.unwrap().to_string(),
+            "http://i.imgur.com/SbBGk.jpg"
+        );
     }
 }

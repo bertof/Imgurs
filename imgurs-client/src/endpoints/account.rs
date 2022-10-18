@@ -306,7 +306,7 @@ mod tests {
             .unwrap();
 
         println!("{:#?}", res);
-        assert_eq!(&res.url, "bertof");
+        assert_eq!(res.url.unwrap(), "bertof");
         assert_eq!(res.id.to_string(), "57420253");
     }
 

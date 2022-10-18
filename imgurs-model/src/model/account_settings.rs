@@ -1,8 +1,7 @@
 //! Account settings specification
 
+use super::common::{AccountID, ProExpiration};
 use serde::{Deserialize, Serialize};
-
-use crate::model::common::{AccountID, ProExpiration};
 
 /// The account settings, only accessible if you're logged in as the user.
 ///
@@ -51,36 +50,13 @@ pub struct BlockedUser {
 mod test {
     use crate::model::{
         account_settings::{AccountSettings, BlockedUser},
-        basic::Basic,
         common::ProExpiration,
     };
 
     #[test]
-    fn test_deserialize_account_settings_local() {
-        let data = r#"{
-            "data": {
-                "email": "josh@imgur.com",
-                "public_images": false,
-                "album_privacy": "secret",
-                "pro_expiration": false,
-                "accepted_gallery_terms": true,
-                "active_emails": [],
-                "messaging_enabled": true,
-                "blocked_users": [{
-                    "blocked_id" : 384077,
-                    "blocked_url": "joshTest"
-                }],
-                "show_mature": false,
-                "first_party": true
-            },
-            "success": true,
-            "status": 200
-        }"#;
-        let account_settings = serde_json::from_str::<Basic<AccountSettings>>(data)
-            .unwrap()
-            .result()
-            .unwrap();
-        println!("{:#?}", account_settings);
+    fn test_deserialize_account_settings_example() {
+        let data = include_str!("../../model_data/account_settings.example.json");
+        let account_settings = serde_json::from_str::<AccountSettings>(data).unwrap();
         assert_eq!(account_settings.email, "josh@imgur.com");
         assert!(!account_settings.public_images);
         assert_eq!(account_settings.album_privacy, "secret");

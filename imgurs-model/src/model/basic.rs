@@ -85,37 +85,14 @@ pub enum Method {
 
 #[cfg(test)]
 mod test {
-    use crate::model::{
-        account_settings::AccountSettings,
-        basic::{Basic, Data, ErrorMessage, Method},
-    };
+    use crate::model::basic::Basic;
 
     #[test]
-    fn test_error_parsing_local() {
-        let res = r#"{
-            "data": {
-                "error": "Authentication required",
-                "request": "/3/account/me/settings",
-                "method": "GET"
-            },
-            "success": false,
-            "status": 401
-        }"#;
-
-        let data = serde_json::from_str::<Basic<AccountSettings>>(res).unwrap();
-        assert!(!data.success);
-        assert_eq!(data.status, 401);
-        match data.data {
-            Data::Content(_) => panic!("Should return error"),
-            Data::Error {
-                error,
-                request,
-                method,
-            } => {
-                assert_eq!(error, ErrorMessage::new("Authentication required"));
-                assert_eq!(request, "/3/account/me/settings");
-                assert_eq!(method, Method::GET);
-            }
-        }
+    fn test_error_parsing_example() {
+        let res = include_str!("../../model_data/basic.example.json");
+        let data = serde_json::from_str::<Basic<bool>>(res).unwrap();
+        assert!(data.success);
+        assert_eq!(data.status, 200);
+        assert!(data.result().unwrap());
     }
 }
