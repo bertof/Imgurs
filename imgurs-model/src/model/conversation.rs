@@ -1,13 +1,11 @@
 //! Conversation specification
 
-use super::{common::AccountID, message::Message};
+use super::{basic::DataModelAdapter, common::AccountID, message::Message};
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
-use std::collections::HashMap;
 use time::{serde::timestamp, OffsetDateTime};
 
 /// The base model for a conversation.
-pub type Conversation = Vec<ConversationEntry>;
+pub type Conversation = Vec<DataModelAdapter<ConversationEntry>>;
 
 /// An item of a conversation
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -34,22 +32,18 @@ pub struct ConversationEntry {
     pub done: Option<bool>,
     /// OPTIONAL: (only available when requesting a specific conversation) Number of the next page
     pub page: Option<u64>,
-
-    /// Other fields that are missing from the API model
-    #[serde(flatten)]
-    pub other: HashMap<String, Value>,
 }
 
 #[cfg(test)]
 mod test {
-    use crate::model::conversation::Conversation;
+    use crate::model::{basic::DataModelAdapter, conversation::Conversation};
     use time::macros::datetime;
 
     #[test]
     fn test_deserialize_conversation_example() {
         let res = include_str!("../../model_data/conversation.example.json");
         let data = serde_json::from_str::<Conversation>(res).unwrap();
-        let message = &data[0];
+        let message = &data[0].data;
         assert_eq!(message.id, 188129);
         assert_eq!(message.with_account, "jasdev");
         assert_eq!(message.with_account_id, 3698510);

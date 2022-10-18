@@ -48,7 +48,10 @@ pub struct Trophy {
 #[cfg(test)]
 mod test {
 
-    use crate::model::{basic::Basic, gallery_profile::GalleryProfile};
+    use crate::model::{
+        basic::{Basic, DataModelAdapter},
+        gallery_profile::GalleryProfile,
+    };
 
     #[test]
     fn test_deserialize_gallery_profile_example() {
@@ -73,7 +76,9 @@ mod test {
             "success": true,
             "status": 200
         }"#;
-        let data = serde_json::from_str::<Basic<GalleryProfile>>(res).unwrap();
+        let data = serde_json::from_str::<Basic<DataModelAdapter<GalleryProfile>>>(res)
+            .unwrap()
+            .data;
         println!("{:#?}", data);
     }
 }

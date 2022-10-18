@@ -50,13 +50,16 @@ pub struct BlockedUser {
 mod test {
     use crate::model::{
         account_settings::{AccountSettings, BlockedUser},
+        basic::DataModelAdapter,
         common::ProExpiration,
     };
 
     #[test]
     fn test_deserialize_account_settings_example() {
         let data = include_str!("../../model_data/account_settings.example.json");
-        let account_settings = serde_json::from_str::<AccountSettings>(data).unwrap();
+        let account_settings = serde_json::from_str::<DataModelAdapter<AccountSettings>>(data)
+            .unwrap()
+            .data;
         assert_eq!(account_settings.email, "josh@imgur.com");
         assert!(!account_settings.public_images);
         assert_eq!(account_settings.album_privacy, "secret");

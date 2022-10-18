@@ -34,6 +34,8 @@ pub trait GalleryClient: Client {
             .send()
             .await?;
 
+        println!("RES: {:?}", res);
+
         parse_response_or_error(res).await
     }
 

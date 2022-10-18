@@ -57,13 +57,15 @@ pub struct GalleryImage {
 #[cfg(test)]
 mod test {
 
-    use crate::model::gallery_image::GalleryImage;
+    use crate::model::{basic::DataModelAdapter, gallery_image::GalleryImage};
     use time::macros::datetime;
 
     #[test]
     fn test_deserialize_gallery_image_example() {
         let res = include_str!("../../model_data/gallery_image.example.json");
-        let data = serde_json::from_str::<GalleryImage>(res).unwrap();
+        let data = serde_json::from_str::<DataModelAdapter<GalleryImage>>(res)
+            .unwrap()
+            .data;
         assert_eq!(data.image.id, "OUHDm");
         assert_eq!(
             data.image.title.unwrap(),
@@ -72,7 +74,7 @@ mod test {
         assert_eq!(data.image.description, None);
         assert_eq!(data.image.datetime, datetime!(2012-10-01 0:33:45.0 UTC));
         assert_eq!(data.image.mime_type, "image/jpeg");
-        assert_eq!(data.image.animated, false);
+        assert!(!data.image.animated);
         assert_eq!(data.image.width, 2490);
         assert_eq!(data.image.height, 3025);
         assert_eq!(data.image.size, 618969);
@@ -87,6 +89,6 @@ mod test {
         assert_eq!(data.downs, 58);
         assert_eq!(data.points, 1831);
         assert_eq!(data.score, 18935622);
-        assert_eq!(data.is_album, false);
+        assert!(!data.is_album);
     }
 }

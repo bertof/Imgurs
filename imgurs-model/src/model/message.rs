@@ -1,6 +1,4 @@
 //! Message specification
-use std::collections::HashMap;
-
 use super::common::{AccountID, Username};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -25,8 +23,4 @@ pub struct Message {
     /// Time message was sent, epoch time
     #[serde(with = "timestamp")]
     datetime: OffsetDateTime,
-
-    /// Other fields that are missing from the API model
-    #[serde(flatten)]
-    pub other: HashMap<String, Value>,
 }

@@ -88,13 +88,15 @@ pub struct BlockResponse {
 
 #[cfg(test)]
 mod test {
-    use crate::model::{account::Account, common::ProExpiration};
+    use crate::model::{account::Account, basic::DataModelAdapter, common::ProExpiration};
     use time::macros::datetime;
 
     #[test]
     fn test_deserialize_account_example() {
         let data = include_str!("../../model_data/account.example.json");
-        let account = serde_json::from_str::<Account>(data).unwrap();
+        let account = serde_json::from_str::<DataModelAdapter<Account>>(data)
+            .unwrap()
+            .data;
         assert_eq!(account.id, 384077);
         assert_eq!(account.url.unwrap(), "joshTest");
         assert_eq!(

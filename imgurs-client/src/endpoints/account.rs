@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use imgurs_model::model::{
     account::{Account, AccountBlocks, BlockedStatus},
-    basic::{Basic, Data},
+    basic::{Basic, Data, DataModelAdapter},
     common::{AccountID, Username},
     custom_gallery::CustomGalleryItem,
 };
@@ -24,7 +24,7 @@ pub trait AccountClient: Client {
     async fn get_account_by_username(
         &self,
         username: Username,
-    ) -> Result<Response<Account>, ClientError> {
+    ) -> Result<Response<DataModelAdapter<Account>>, ClientError> {
         let res = self
             .get_client()
             .get(&format!("https://api.imgur.com/3/account/{}", username))
@@ -303,7 +303,8 @@ mod tests {
             .unwrap()
             .content
             .result()
-            .unwrap();
+            .unwrap()
+            .data;
 
         println!("{:#?}", res);
         assert_eq!(res.url.unwrap(), "bertof");

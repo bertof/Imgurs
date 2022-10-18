@@ -1,10 +1,8 @@
 //! Album specification
 
-use std::{collections::HashMap, fmt};
-
 use super::common::AccountID;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use std::fmt;
 use time::{serde::timestamp, OffsetDateTime};
 use url::Url;
 
@@ -36,7 +34,7 @@ pub struct Album {
     /// The ID for the album
     pub id: AlbumID,
     /// The title of the album in the gallery
-    pub title: String,
+    pub title: Option<String>,
     /// The description of the album in the gallery
     pub description: Option<String>,
     /// Time inserted into the gallery, epoch time
@@ -74,28 +72,29 @@ pub struct Album {
     #[serde(rename = "deletehash")]
     pub delete_hash: Option<String>,
     /// The total number of images in the album
-    pub images_count: u64,
+    pub images_count: Option<u64>,
     /// An array of all the images in the album (only available when requesting the direct album)
     pub images: Vec<Image>,
     /// True if the image has been submitted to the gallery, false if otherwise.
     pub in_gallery: Option<bool>,
-
-    /// Other fields that are missing from the API model
-    #[serde(flatten)]
-    pub other: HashMap<String, Value>,
 }
 
 #[cfg(test)]
 mod test {
-    use crate::model::album::{Album, AlbumID};
+    use crate::model::{
+        album::{Album, AlbumID},
+        basic::DataModelAdapter,
+    };
     use time::macros::datetime;
 
     #[test]
     fn test_deserialize_album_example() {
         let res = include_str!("../../model_data/album.example.json");
-        let album = serde_json::from_str::<Album>(res).unwrap();
+        let album = serde_json::from_str::<DataModelAdapter<Album>>(res)
+            .unwrap()
+            .data;
         assert_eq!(album.id, AlbumID::from("lDRB2"));
-        assert_eq!(album.title, "Imgur Office");
+        assert_eq!(album.title.unwrap(), "Imgur Office");
         assert_eq!(album.description, None);
         assert_eq!(album.cover.unwrap(), "24nLu");
         assert_eq!(album.cover_width, None);
@@ -109,8 +108,8 @@ mod test {
         assert_eq!(album.favorite, None);
         assert_eq!(album.nsfw, None);
         assert_eq!(album.section, None);
-        assert_eq!(album.images_count, 11);
-        assert_eq!(album.images_count, album.images.len() as u64);
+        assert_eq!(album.images_count.unwrap(), 11);
+        assert_eq!(album.images_count.unwrap(), album.images.len() as u64);
         assert_eq!(album.in_gallery, None);
 
         let image = &album.images[0];

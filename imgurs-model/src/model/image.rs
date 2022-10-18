@@ -1,9 +1,6 @@
 //! Image specification
 
-use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use time::{serde::timestamp, OffsetDateTime};
 use url::Url;
 
@@ -59,21 +56,19 @@ pub struct Image {
     pub vote: Option<String>,
     /// True if the image has been submitted to the gallery, false if otherwise.
     in_gallery: Option<bool>,
-
-    /// Other fields that are missing from the API model
-    #[serde(flatten)]
-    pub other: HashMap<String, Value>,
 }
 
 #[cfg(test)]
 mod test {
-    use crate::model::image::Image;
+    use crate::model::{basic::DataModelAdapter, image::Image};
     use time::macros::datetime;
 
     #[test]
     fn test_deserialize_image_example() {
         let res_data = include_str!("../../model_data/image.example.json");
-        let image = serde_json::from_str::<Image>(res_data).unwrap();
+        let image = serde_json::from_str::<DataModelAdapter<Image>>(res_data)
+            .unwrap()
+            .data;
         println!("{:#?}", image);
         assert_eq!(image.id, "SbBGk");
         assert_eq!(image.title, None);

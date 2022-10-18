@@ -2,8 +2,6 @@
 
 use super::common::{AccountID, Username};
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
-use std::collections::HashMap;
 use time::{serde::timestamp, OffsetDateTime};
 
 /// The base model for a comment.
@@ -45,21 +43,19 @@ pub struct Comment {
     pub vote: Option<String>,
     /// All of the replies for this comment. If there are no replies to the comment then this is an empty set.
     pub children: Option<Vec<Comment>>,
-
-    /// Other fields that are missing from the API model
-    #[serde(flatten)]
-    pub other: HashMap<String, Value>,
 }
 
 #[cfg(test)]
 mod test {
-    use crate::model::comment::Comment;
+    use crate::model::{basic::DataModelAdapter, comment::Comment};
     use time::macros::datetime;
 
     #[test]
     fn test_deserialize_comment_example() {
         let res = include_str!("../../model_data/comment.example.json");
-        let data = serde_json::from_str::<Comment>(res).unwrap();
+        let data = serde_json::from_str::<DataModelAdapter<Comment>>(res)
+            .unwrap()
+            .data;
         assert_eq!(data.id, 1110);
         assert_eq!(data.image_id, "K84kO");
         assert_eq!(data.comment, None);
