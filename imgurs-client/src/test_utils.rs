@@ -1,5 +1,5 @@
 use crate::client::{AuthenticatedClient, BasicClient};
-use imgurs_model::model::authorization::{AccessToken, ClientID, ClientSecret, RefreshToken};
+use imgurs_model::model::common::{AccessToken, ClientID, ClientSecret, RefreshToken};
 pub use std::{convert::TryFrom, env};
 use time::OffsetDateTime;
 

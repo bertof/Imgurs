@@ -2,7 +2,7 @@ use crate::{
     error::ClientError,
     traits::{Client, RegisteredClient},
 };
-use imgurs_model::model::authorization::{AccessToken, ClientID, ClientSecret, RefreshToken};
+use imgurs_model::model::common::{AccessToken, ClientID, ClientSecret, RefreshToken};
 use reqwest::{
     header::{HeaderMap, HeaderName, HeaderValue},
     Client as ReqwestClient, ClientBuilder as ReqwestClientBuilder,
@@ -204,124 +204,5 @@ impl fmt::Display for SortPreference {
                 SortPreference::Worst => "worst",
             }
         )
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::{test_utils::*, traits::Client};
-    use imgurs_model::{
-        error::ErrorMessage,
-        model::{
-            account::Account,
-            account_settings::AccountSettings,
-            album::Album,
-            basic::{Basic, Data, Method},
-            comment::Comment,
-        },
-    };
-    use reqwest::StatusCode;
-
-    #[tokio::test]
-    async fn test_deserialize_account_remote() {
-        let client = get_basic_client().unwrap();
-        let account = client
-            .get_client()
-            .get("https://api.imgur.com/3/account/ghostinspector")
-            .send()
-            .await
-            .unwrap()
-            .json::<Basic<Account>>()
-            .await
-            .unwrap();
-        println!("{:#?}", account);
-    }
-
-    #[tokio::test]
-    async fn test_deserialize_album_remote() {
-        let client = get_basic_client().unwrap();
-        let data = client
-            .get_client()
-            .get("https://api.imgur.com/3/album/z6B0j")
-            .send()
-            .await
-            .unwrap()
-            .json::<Basic<Album>>()
-            .await
-            .unwrap()
-            .result()
-            .unwrap();
-        println!("{:#?}", data);
-    }
-
-    #[tokio::test]
-    async fn test_deserialize_comment_remote() {
-        let client = get_basic_client().unwrap();
-        let data = client
-            .get_client()
-            .get("https://api.imgur.com/3/comment/1938633683")
-            .send()
-            .await
-            .unwrap()
-            .json::<Basic<Comment>>()
-            .await
-            .unwrap()
-            .result()
-            .unwrap();
-        println!("{:#?}", data);
-    }
-
-    #[ignore]
-    #[tokio::test]
-    async fn test_deserialize_account_settings_remote() {
-        unimplemented!()
-    }
-
-    #[ignore]
-    #[tokio::test]
-    async fn test_deserialize_conversation_remote() {
-        unimplemented!()
-    }
-
-    #[ignore]
-    #[tokio::test]
-    async fn test_deserialize_custom_gallery_remote() {
-        unimplemented!()
-    }
-
-    #[ignore]
-    #[tokio::test]
-    async fn test_deserialize_gallery_image_remote() {
-        unimplemented!()
-    }
-
-    #[ignore]
-    #[tokio::test]
-    async fn test_deserialize_gallery_profile_remote() {
-        unimplemented!()
-    }
-
-    #[tokio::test]
-    async fn test_error_parsing_remote() {
-        let res = reqwest::get("https://api.imgur.com/3/account/me/settings")
-            .await
-            .unwrap();
-        assert_eq!(res.status(), StatusCode::from_u16(401).unwrap());
-
-        let data = res.json::<Basic<AccountSettings>>().await.unwrap();
-        assert!(!data.success);
-        assert_eq!(data.status, 401);
-        match data.data {
-            Data::Content(_) => panic!("Should return error"),
-            Data::Error {
-                error,
-                request,
-                method,
-            } => {
-                assert_eq!(error, ErrorMessage::new("Authentication required"));
-                assert_eq!(request, "/3/account/me/settings");
-                assert_eq!(method, Method::GET);
-            }
-        }
     }
 }

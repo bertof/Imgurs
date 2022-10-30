@@ -1,0 +1,10 @@
+{
+  "errors": [
+    {
+      "code": "429",
+      "detail": "Too Many Requests",
+      "id": "account-api-76b55d66fc-xjx7v/ngsZ72iP2f-6859911",
+      "status": "Too Many Requests"
+    }
+  ]
+}

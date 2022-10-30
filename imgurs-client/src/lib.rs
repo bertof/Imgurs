@@ -4,9 +4,10 @@
 pub mod client;
 pub mod error;
 pub mod response;
+pub mod traits;
+
 #[cfg(test)]
 pub(crate) mod test_utils;
-pub mod traits;
 
 pub mod endpoints {
     //! API endpoints

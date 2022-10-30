@@ -41,7 +41,7 @@ mod test {
     use time::macros::datetime;
 
     #[test]
-    fn test_deserialize_gallery_album_example() {
+    fn parse_gallery_album_example() {
         let res = include_str!("../../model_data/gallery_album.example.json");
         let data = serde_json::from_str::<DataModelAdapter<GalleryAlbum>>(res)
             .unwrap()

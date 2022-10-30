@@ -50,31 +50,30 @@ pub struct BlockedUser {
 mod test {
     use crate::model::{
         account_settings::{AccountSettings, BlockedUser},
-        basic::DataModelAdapter,
         common::ProExpiration,
     };
 
-    #[test]
-    fn test_deserialize_account_settings_example() {
-        let data = include_str!("../../model_data/account_settings.example.json");
-        let account_settings = serde_json::from_str::<DataModelAdapter<AccountSettings>>(data)
-            .unwrap()
-            .data;
-        assert_eq!(account_settings.email, "josh@imgur.com");
-        assert!(!account_settings.public_images);
-        assert_eq!(account_settings.album_privacy, "secret");
-        assert_eq!(account_settings.pro_expiration, ProExpiration::Bool(false));
-        assert!(account_settings.accepted_gallery_terms);
-        assert_eq!(account_settings.active_emails, Vec::<String>::new());
-        assert!(account_settings.messaging_enabled);
-        assert_eq!(
-            account_settings.blocked_users,
-            vec![BlockedUser {
-                blocked_id: 384077,
-                blocked_url: "joshTest".to_string()
-            }]
-        );
-        assert!(!account_settings.show_mature);
-        assert!(account_settings.first_party);
-    }
+    // #[test]
+    // fn test_deserialize_account_settings_example() {
+    //     let data = include_str!("../../model_data/account_settings.example.json");
+    //     let account_settings = serde_json::from_str::<DataModelAdapter<AccountSettings>>(data)
+    //         .unwrap()
+    //         .data;
+    //     assert_eq!(account_settings.email, "josh@imgur.com");
+    //     assert!(!account_settings.public_images);
+    //     assert_eq!(account_settings.album_privacy, "secret");
+    //     assert_eq!(account_settings.pro_expiration, ProExpiration::Bool(false));
+    //     assert!(account_settings.accepted_gallery_terms);
+    //     assert_eq!(account_settings.active_emails, Vec::<String>::new());
+    //     assert!(account_settings.messaging_enabled);
+    //     assert_eq!(
+    //         account_settings.blocked_users,
+    //         vec![BlockedUser {
+    //             blocked_id: 384077,
+    //             blocked_url: "joshTest".to_string()
+    //         }]
+    //     );
+    //     assert!(!account_settings.show_mature);
+    //     assert!(account_settings.first_party);
+    // }
 }

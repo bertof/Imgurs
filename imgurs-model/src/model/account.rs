@@ -8,7 +8,7 @@ use url::Url;
 /// Basic account information representation.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-#[serde(deny_unknown_fields)]
+// #[serde(deny_unknown_fields)]
 pub struct Account {
     /// The account id for the username requested.
     pub id: AccountID,
@@ -48,70 +48,99 @@ pub struct UserFollow {
     pub status: bool,
 }
 
-/// User blocked status
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[serde(deny_unknown_fields)]
-pub struct BlockedStatus {
-    /// Blocked status
-    pub blocked: bool,
-}
+// /// User blocked status
+// ///
+// /// TODO: could not test, always returns 429 too many requests
+// #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+// #[serde(rename_all = "snake_case")]
+// #[serde(deny_unknown_fields)]
+// pub struct BlockedStatus {
+//     /// Blocked status
+//     pub blocked: bool,
+// }
 
-/// List of blocked accounts
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[serde(deny_unknown_fields)]
-pub struct AccountBlocks {
-    /// TODO: Missing from API model
-    pub items: Vec<BlockedAccount>,
-    /// TODO: Missing from API model
-    pub next: Option<serde_json::Value>,
-}
+// /// List of blocked accounts
+// #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+// #[serde(rename_all = "snake_case")]
+// #[serde(deny_unknown_fields)]
+// pub struct AccountBlocks {
+//     /// TODO: Missing from API model
+//     pub items: Vec<BlockedAccount>,
+//     /// TODO: Missing from API model
+//     pub next: Option<serde_json::Value>,
+// }
 
-/// Blocked account
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[serde(deny_unknown_fields)]
-pub struct BlockedAccount {
-    /// Account username
-    pub url: Username,
-}
+// /// Blocked account
+// #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+// #[serde(rename_all = "snake_case")]
+// #[serde(deny_unknown_fields)]
+// pub struct BlockedAccount {
+//     /// Account username
+//     pub url: Username,
+// }
 
-/// Create block response
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[serde(deny_unknown_fields)]
-pub struct BlockResponse {
-    /// Blocked status
-    pub blocked: bool,
-}
+// /// Create block response
+// #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+// #[serde(rename_all = "snake_case")]
+// #[serde(deny_unknown_fields)]
+// pub struct BlockResponse {
+//     /// Blocked status
+//     pub blocked: bool,
+// }
 
 #[cfg(test)]
 mod test {
-    use crate::model::{account::Account, basic::DataModelAdapter, common::ProExpiration};
+    use super::*;
+    use crate::model::{basic::Response, common::ProExpiration};
     use time::macros::datetime;
 
     #[test]
-    fn test_deserialize_account_example() {
+    fn parse_account_example() {
         let data = include_str!("../../model_data/account.example.json");
-        let account = serde_json::from_str::<DataModelAdapter<Account>>(data)
+        let account = serde_json::from_str::<Response<Account>>(data)
             .unwrap()
-            .data;
-        assert_eq!(account.id, 384077);
-        assert_eq!(account.url.unwrap(), "joshTest");
-        assert_eq!(
-            account.bio.unwrap(),
-            "A real hoopy frood who really knows where his towel is at."
-        );
+            .result()
+            .unwrap();
+        assert_eq!(account.id, 48437714);
+        assert_eq!(account.url.unwrap(), "ghostinspector");
+        assert_eq!(account.bio, None);
         assert_eq!(account.avatar, None);
         assert_eq!(account.avatar_name, None);
         assert_eq!(account.cover, None);
         assert_eq!(account.cover_name, None);
-        assert_eq!(account.reputation, 15303.84);
-        assert_eq!(account.reputation_name, None);
-        assert_eq!(account.created, datetime!(2013-08-19 22:31:44.0 UTC));
+        assert_eq!(account.reputation, 0.0);
+        assert_eq!(account.reputation_name.unwrap(), "Neutral");
+        assert_eq!(account.created, datetime!(2016-12-15 22:07:48.0 UTC));
         assert_eq!(account.pro_expiration, ProExpiration::Bool(false));
-        assert_eq!(account.user_follow, None);
+        assert!(!account.user_follow.unwrap().status);
         assert_eq!(account.is_blocked, None);
+    }
+
+    #[test]
+    fn parse_account_real() {
+        let data = include_str!("../../model_data/account.real.json");
+        let account = serde_json::from_str::<Response<Account>>(data)
+            .unwrap()
+            .result()
+            .unwrap();
+        assert_eq!(account.id, 57420253);
+        assert_eq!(account.url.unwrap(), "bertof");
+        assert_eq!(account.bio, None);
+        assert_eq!(
+            account.avatar.unwrap().to_string(),
+            "https://imgur.com/user/bertof/avatar?maxwidth=290"
+        );
+        assert_eq!(account.avatar_name.unwrap(), "default/B");
+        assert_eq!(
+            account.cover.unwrap().to_string(),
+            "https://imgur.com/user/bertof/cover?maxwidth=2560"
+        );
+        assert_eq!(account.cover_name.unwrap(), "default/1-space");
+        assert_eq!(account.reputation, 4.0);
+        assert_eq!(account.reputation_name.unwrap(), "Neutral");
+        assert_eq!(account.created, datetime!(2017-03-23 21:48:00.0 UTC));
+        assert_eq!(account.pro_expiration, ProExpiration::Bool(false));
+        assert!(!account.user_follow.unwrap().status);
+        assert!(!account.is_blocked.unwrap());
     }
 }

@@ -1,8 +1,17 @@
 {
-  "id": 384077,
-  "url": "joshTest",
-  "bio": "A real hoopy frood who really knows where his towel is at.",
-  "reputation": 15303.84,
-  "created": 1376951504,
-  "pro_expiration": false
+  "data": {
+    "id": 48437714,
+    "url": "ghostinspector",
+    "bio": null,
+    "avatar": null,
+    "reputation": 0,
+    "reputation_name": "Neutral",
+    "created": 1481839668,
+    "pro_expiration": false,
+    "user_follow": {
+      "status": false
+    }
+  },
+  "success": true,
+  "status": 200
 }
