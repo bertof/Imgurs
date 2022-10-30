@@ -1,67 +1,6 @@
 //! API response specification
-use serde::{Deserialize, Serialize};
-
 use crate::error::ErrorMessage;
-
-/// API response common fields
-///
-/// This is the basic response for requests that do not return data. If the POST request has a Basic model it will return the id.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[serde(deny_unknown_fields)]
-pub struct Basic<T> {
-    /// Response data
-    pub data: Data<T>,
-    /// Success status
-    pub success: bool,
-    /// HTTP status
-    pub status: u16,
-}
-
-impl<T> From<Basic<T>> for Result<T, ErrorMessage> {
-    fn from(b: Basic<T>) -> Self {
-        b.data.into()
-    }
-}
-
-impl<T> Basic<T> {
-    /// Convert Basic into a result
-    pub fn result(self) -> Result<T, ErrorMessage> {
-        self.into()
-    }
-}
-
-/// API response data
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[serde(deny_unknown_fields)]
-#[serde(untagged)]
-pub enum Data<T> {
-    /// Content in the response
-    Content(T),
-    /// Error in the response
-    Error {
-        /// Error message
-        error: ErrorMessage,
-        /// Requested content
-        request: String,
-        /// Method used in the request
-        method: Method,
-    },
-}
-
-impl<T> From<Data<T>> for Result<T, ErrorMessage> {
-    fn from(d: Data<T>) -> Self {
-        match d {
-            Data::Content(c) => Ok(c),
-            Data::Error {
-                error,
-                request: _,
-                method: _,
-            } => Err(error),
-        }
-    }
-}
+use serde::{Deserialize, Serialize};
 
 /// HTTP methods
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -78,43 +17,101 @@ pub enum Method {
     DELETE,
 }
 
-#[cfg(test)]
-mod test {
-    use std::error::Error;
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct RequestError {
+    code: String,
+    detail: String,
+    id: String,
+    status: ErrorMessage,
+}
 
-    use crate::model::{
-        account_settings::AccountSettings,
-        basic::{Basic, Data, ErrorMessage, Method},
-    };
+/// API response data
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[serde(untagged)]
+pub enum Response<T> {
+    /// Content in the response
+    Content {
+        /// Response data
+        data: T,
+        /// HTTP status code
+        status: u16,
+        /// Success status
+        success: bool,
+    },
+    /// Error in the response
+    Error {
+        /// Error message
+        error: ErrorMessage,
+        /// Requested content
+        request: String,
+        /// Method used in the request
+        method: Method,
+    },
+    /// Errors in the request
+    Errors { errors: Vec<RequestError> },
+}
 
-    #[test]
-    fn test_error_parsing_local() -> Result<(), Box<dyn Error>> {
-        let res = r#"{
-            "data": {
-                "error": "Authentication required",
-                "request": "/3/account/me/settings",
-                "method": "GET"
-            },
-            "success": false,
-            "status": 401
-        }"#;
+impl<T> Response<T> {
+    pub fn result(self) -> Result<T, ErrorMessage> {
+        self.into()
+    }
+}
 
-        let data = serde_json::from_str::<Basic<AccountSettings>>(res)?;
-        assert!(!data.success);
-        assert_eq!(data.status, 401);
-        match data.data {
-            Data::Content(_) => panic!("Should return error"),
-            Data::Error {
-                error,
-                request,
-                method,
-            } => {
-                assert_eq!(error, ErrorMessage::new("Authentication required"));
-                assert_eq!(request, "/3/account/me/settings");
-                assert_eq!(method, Method::GET);
+impl<T> From<Response<T>> for Result<T, ErrorMessage> {
+    fn from(r: Response<T>) -> Self {
+        match r {
+            Response::Content { data, .. } => Ok(data),
+            Response::Error { error, .. } => Err(error),
+            Response::Errors { errors } => {
+                // todo!();
+                Err(errors.iter().map(|e| &e.status).into())
             }
         }
+    }
+}
 
-        Ok(())
+#[cfg(test)]
+mod test {
+    use crate::model::basic::Response;
+
+    #[test]
+    fn parsing_example() {
+        let res = include_str!("../../model_data/basic.example.json");
+        let parsed_data = serde_json::from_str::<Response<bool>>(res).unwrap();
+        match parsed_data {
+            Response::Content {
+                data,
+                status,
+                success,
+            } => {
+                assert!(success);
+                assert_eq!(status, 200);
+                assert!(data)
+            }
+            _ => panic!(
+                "Invalid type, shoud be Content instead got {:?}",
+                parsed_data
+            ),
+        }
+    }
+
+    #[test]
+    fn parsing_errors() {
+        let res = include_str!("../../model_data/too_many_requests.real.json");
+        let parsed_data = serde_json::from_str::<Response<bool>>(res).unwrap();
+        match parsed_data {
+            Response::Errors { errors } => {
+                assert_eq!(errors.len(), 1);
+                let e = &errors[0];
+                assert_eq!(e.code, "429");
+                assert_eq!(e.status.0, "Too Many Requests");
+            }
+            _ => panic!(
+                "Invalid type, shoud be Errors instead got {:?}",
+                parsed_data
+            ),
+        }
     }
 }

@@ -1,41 +1,23 @@
 //! Album specification
 
-use std::fmt;
-
-use crate::model::common::AccountID;
+use super::common::AccountID;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use time::{serde::timestamp, OffsetDateTime};
 use url::Url;
 
+use super::image::Image;
+
 /// Album unique identifier
-#[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
-pub struct AlbumID(String);
-
-impl<U> From<U> for AlbumID
-where
-    U: Into<String>,
-{
-    fn from(v: U) -> Self {
-        AlbumID(v.into())
-    }
-}
-
-impl fmt::Display for AlbumID {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.fmt(f)
-    }
-}
+pub type AlbumID = String;
 
 /// The base model for an album
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-#[serde(deny_unknown_fields)]
 pub struct Album {
     /// The ID for the album
     pub id: AlbumID,
     /// The title of the album in the gallery
-    pub title: String,
+    pub title: Option<String>,
     /// The description of the album in the gallery
     pub description: Option<String>,
     /// Time inserted into the gallery, epoch time
@@ -43,8 +25,6 @@ pub struct Album {
     pub datetime: OffsetDateTime,
     /// The ID of the album cover image
     pub cover: Option<String>,
-    /// TODO: missing from API model
-    pub cover_edited: Option<Value>,
     /// The width, in pixels, of the album cover image
     pub cover_width: Option<u64>,
     /// The height, in pixels, of the album cover image
@@ -54,58 +34,701 @@ pub struct Album {
     /// The account ID or null if it's anonymous.
     pub account_id: Option<AccountID>,
     /// The privacy level of the album, you can only view public if not logged in as album owner
-    // TODO: Switch to enum
+    /// TODO: Switch to enum
     pub privacy: String,
     /// The view layout of the album.
-    // TODO: Switch to enum
+    /// TODO: Switch to enum
     pub layout: String,
     /// The number of album views
     pub views: u64,
     /// The URL link to the album
     pub link: Url,
     /// Indicates if the current user favorited the image. Defaults to false if not signed in.
-    pub favorite: bool,
+    pub favorite: Option<bool>,
     /// Indicates if the image has been marked as nsfw or not. Defaults to null if information is not available.
-    pub nsfw: bool,
+    pub nsfw: Option<bool>,
     /// If the image has been categorized by our backend then this will contain the section the image belongs in. (funny, cats, adviceanimals, wtf, etc)
-    pub section: String,
+    pub section: Option<String>,
     /// Order number of the album on the user's album page (defaults to 0 if their albums haven't been reordered)
     pub order: Option<u64>,
     /// OPTIONAL, the deletehash, if you're logged in as the album owner
     #[serde(rename = "deletehash")]
     pub delete_hash: Option<String>,
     /// The total number of images in the album
-    pub images_count: u64,
+    pub images_count: Option<u64>,
     /// An array of all the images in the album (only available when requesting the direct album)
-    ///
-    /// TODO: switch to image object
-    pub images: Vec<Value>,
+    pub images: Vec<Image>,
     /// True if the image has been submitted to the gallery, false if otherwise.
-    pub in_gallery: bool,
-    /// True if the image is an ad
-    pub is_ad: bool,
-    /// TODO: missing from API model
-    pub include_album_ads: bool,
-    /// TODO: missing from API model
-    pub is_album: bool,
-    /// TODO: missing from API model, switch to an object
-    pub ad_config: Value,
+    pub in_gallery: Option<bool>,
 }
 
 #[cfg(test)]
 mod test {
-    use std::error::Error;
-
-    use crate::model::{album::Album, basic::Basic};
+    use crate::model::{album::Album, basic::Response, gallery_image::GalleryImage, image::Image};
+    use time::macros::datetime;
 
     #[test]
-    fn test_deserialize_album_local() -> Result<(), Box<dyn Error>> {
-        let res = r#"{"data":{"id":"z6B0j","title":"DOOGLE","description":null,"datetime":1515221993,"cover":null,"cover_edited":null,"cover_width":null,"cover_height":null,"account_url":null,"account_id":null,"privacy":"public","layout":"blog","views":84,"link":"https://imgur.com/a/z6B0j","favorite":false,"nsfw":false,"section":"ImgurAlbums","images_count":1,"in_gallery":false,"is_ad":false,"include_album_ads":false,"is_album":true,"images":[{"id":"1nneRbX","title":"DOOGLE","description":"Doogle","datetime":1515221708,"type":"image/png","animated":false,"width":1279,"height":717,"size":379024,"views":8705,"bandwidth":3299403920,"vote":null,"favorite":false,"nsfw":null,"section":null,"account_url":null,"account_id":null,"is_ad":false,"in_most_viral":false,"has_sound":false,"tags":[],"ad_type":0,"ad_url":"","edited":"0","in_gallery":false,"link":"https://i.imgur.com/1nneRbX.png"}],"ad_config":{"safeFlags":["not_in_gallery","subreddit","page_load"],"highRiskFlags":[],"unsafeFlags":["sixth_mod_unsafe"],"wallUnsafeFlags":[],"showsAds":false}},"success":true,"status":200}"#;
+    fn parse_album_example() {
+        let res = include_str!("../../model_data/album.example.json");
+        let album = serde_json::from_str::<Response<Album>>(res)
+            .unwrap()
+            .result()
+            .unwrap();
 
-        let data = serde_json::from_str::<Basic<Album>>(res)?;
+        let expected_album = Album {
+            id: "lDRB2".to_string(),
+            title: Some("Imgur Office".to_string()),
+            description: None,
+            datetime: datetime!(2013-01-10 22:18:12.0 UTC),
+            cover: Some("24nLu".to_string()),
+            cover_width: None,
+            cover_height: None,
+            account_url: Some("Alan".to_string()),
+            account_id: Some(4),
+            privacy: "public".to_string(),
+            layout: "blog".to_string(),
+            views: 13780,
+            link: "http://alanbox.imgur.com/a/lDRB2".parse().unwrap(),
+            favorite: None,
+            nsfw: None,
+            section: None,
+            order: None,
+            delete_hash: None,
+            images_count: Some(11),
+            images: vec![
+                Image {
+                    id: "24nLu".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:19:12.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 2592,
+                    height: 1944,
+                    size: 855658,
+                    views: 135772,
+                    bandwidth: 116174397976,
+                    link: Some("http://i.imgur.com/24nLu.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: None,
+                    gifv: None,
+                    in_gallery: None,
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+                Image {
+                    id: "Ziz25".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:19:54.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 2592,
+                    height: 1944,
+                    size: 919391,
+                    views: 135493,
+                    bandwidth: 124571044763,
+                    link: Some("http://i.imgur.com/Ziz25.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: None,
+                    gifv: None,
+                    in_gallery: None,
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+                Image {
+                    id: "9tzW6".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:19:45.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 2592,
+                    height: 1944,
+                    size: 655028,
+                    views: 135063,
+                    bandwidth: 88470046764,
+                    link: Some("http://i.imgur.com/9tzW6.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: None,
+                    gifv: None,
+                    in_gallery: None,
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+                Image {
+                    id: "dFg5u".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:19:38.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 2592,
+                    height: 1944,
+                    size: 812738,
+                    views: 134704,
+                    bandwidth: 109479059552,
+                    link: Some("http://i.imgur.com/dFg5u.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: None,
+                    gifv: None,
+                    in_gallery: None,
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+                Image {
+                    id: "oknLx".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:18:58.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 1749,
+                    height: 2332,
+                    size: 717324,
+                    views: 32938,
+                    bandwidth: 23627217912,
+                    link: Some("http://i.imgur.com/oknLx.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: None,
+                    gifv: None,
+                    in_gallery: None,
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+                Image {
+                    id: "OL6tC".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:18:41.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 2592,
+                    height: 1944,
+                    size: 1443262,
+                    views: 32346,
+                    bandwidth: 46683752652,
+                    link: Some("http://i.imgur.com/OL6tC.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: None,
+                    gifv: None,
+                    in_gallery: None,
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+                Image {
+                    id: "cJ9cm".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:18:50.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 2592,
+                    height: 1944,
+                    size: 544702,
+                    views: 31829,
+                    bandwidth: 17337319958,
+                    link: Some("http://i.imgur.com/cJ9cm.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: None,
+                    gifv: None,
+                    in_gallery: None,
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+                Image {
+                    id: "7BtPN".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:19:29.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 2592,
+                    height: 1944,
+                    size: 844863,
+                    views: 31257,
+                    bandwidth: 26407882791,
+                    link: Some("http://i.imgur.com/7BtPN.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: None,
+                    gifv: None,
+                    in_gallery: None,
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+                Image {
+                    id: "42ib8".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:20:24.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 2592,
+                    height: 1944,
+                    size: 905073,
+                    views: 30945,
+                    bandwidth: 28007483985,
+                    link: Some("http://i.imgur.com/42ib8.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: None,
+                    gifv: None,
+                    in_gallery: None,
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+                Image {
+                    id: "BbwIx".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:19:20.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 1749,
+                    height: 2332,
+                    size: 662413,
+                    views: 30107,
+                    bandwidth: 19943268191,
+                    link: Some("http://i.imgur.com/BbwIx.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: None,
+                    gifv: None,
+                    in_gallery: None,
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+                Image {
+                    id: "x7b91".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:20:06.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 1944,
+                    height: 2592,
+                    size: 618567,
+                    views: 29259,
+                    bandwidth: 18098651853,
+                    link: Some("http://i.imgur.com/x7b91.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: None,
+                    gifv: None,
+                    in_gallery: None,
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+            ],
+            in_gallery: None,
+        };
 
-        println!("{:#?}", data);
+        assert_eq!(album.datetime, expected_album.datetime);
 
-        Ok(())
+        for (a, b) in album.images.iter().zip(expected_album.images.iter()) {
+            assert_eq!(a, b);
+        }
+
+        assert_eq!(album, expected_album);
+    }
+
+    #[test]
+    fn parse_album_images_real() {
+        let res = include_str!("../../model_data/album_images.real.json");
+        let images = serde_json::from_str::<Response<Vec<GalleryImage>>>(res)
+            .unwrap()
+            .result()
+            .unwrap();
+
+        let expected_images = vec![
+            GalleryImage {
+                account_id: None,
+                account_url: None,
+                in_most_viral: Some(false),
+                image: Image {
+                    id: "Ziz25".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:19:54.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 2592,
+                    height: 1944,
+                    size: 919391,
+                    views: 2918,
+                    bandwidth: 2682782938,
+                    link: Some("https://i.imgur.com/Ziz25.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: Some(false),
+                    gifv: None,
+                    in_gallery: Some(false),
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+            },
+            GalleryImage {
+                account_id: None,
+                account_url: None,
+                in_most_viral: Some(false),
+                image: Image {
+                    id: "42ib8".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:20:24.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 2592,
+                    height: 1944,
+                    size: 905073,
+                    views: 106297,
+                    bandwidth: 96206544681,
+                    link: Some("https://i.imgur.com/42ib8.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: Some(false),
+                    gifv: None,
+                    in_gallery: Some(false),
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+            },
+            GalleryImage {
+                account_id: None,
+                account_url: None,
+                in_most_viral: Some(false),
+                image: Image {
+                    id: "24nLu".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:19:12.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 2592,
+                    height: 1944,
+                    size: 855658,
+                    views: 2233,
+                    bandwidth: 1910684314,
+                    link: Some("https://i.imgur.com/24nLu.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: Some(false),
+                    gifv: None,
+                    in_gallery: Some(false),
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+            },
+            GalleryImage {
+                account_id: None,
+                account_url: None,
+                in_most_viral: Some(false),
+                image: Image {
+                    id: "7BtPN".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:19:29.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 2592,
+                    height: 1944,
+                    size: 844863,
+                    views: 1395,
+                    bandwidth: 1178583885,
+                    link: Some("https://i.imgur.com/7BtPN.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: Some(false),
+                    gifv: None,
+                    in_gallery: Some(false),
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+            },
+            GalleryImage {
+                account_id: None,
+                account_url: None,
+                in_most_viral: Some(false),
+                image: Image {
+                    id: "oknLx".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:18:58.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 1749,
+                    height: 2332,
+                    size: 717324,
+                    views: 1442,
+                    bandwidth: 1034381208,
+                    link: Some("https://i.imgur.com/oknLx.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: Some(false),
+                    gifv: None,
+                    in_gallery: Some(false),
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+            },
+            GalleryImage {
+                account_id: None,
+                account_url: None,
+                in_most_viral: Some(false),
+                image: Image {
+                    id: "cJ9cm".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:18:50.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 2592,
+                    height: 1944,
+                    size: 544702,
+                    views: 1367,
+                    bandwidth: 744607634,
+                    link: Some("https://i.imgur.com/cJ9cm.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: Some(false),
+                    gifv: None,
+                    in_gallery: Some(false),
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+            },
+            GalleryImage {
+                account_id: None,
+                account_url: None,
+                in_most_viral: Some(false),
+                image: Image {
+                    id: "dFg5u".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:19:38.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 2592,
+                    height: 1944,
+                    size: 812738,
+                    views: 1399,
+                    bandwidth: 1137020462,
+                    link: Some("https://i.imgur.com/dFg5u.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: Some(false),
+                    gifv: None,
+                    in_gallery: Some(false),
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+            },
+            GalleryImage {
+                account_id: None,
+                account_url: None,
+                in_most_viral: Some(false),
+                image: Image {
+                    id: "9tzW6".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:19:45.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 2592,
+                    height: 1944,
+                    size: 655028,
+                    views: 1648,
+                    bandwidth: 1079486144,
+                    link: Some("https://i.imgur.com/9tzW6.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: Some(false),
+                    gifv: None,
+                    in_gallery: Some(false),
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+            },
+            GalleryImage {
+                account_id: None,
+                account_url: None,
+                in_most_viral: Some(false),
+                image: Image {
+                    id: "BbwIx".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:19:20.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 1749,
+                    height: 2332,
+                    size: 662413,
+                    views: 1358,
+                    bandwidth: 899556854,
+                    link: Some("https://i.imgur.com/BbwIx.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: Some(false),
+                    gifv: None,
+                    in_gallery: Some(false),
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+            },
+            GalleryImage {
+                account_id: None,
+                account_url: None,
+                in_most_viral: Some(false),
+                image: Image {
+                    id: "x7b91".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:20:06.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 1944,
+                    height: 2592,
+                    size: 618567,
+                    views: 1385,
+                    bandwidth: 856715295,
+                    link: Some("https://i.imgur.com/x7b91.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: Some(false),
+                    gifv: None,
+                    in_gallery: Some(false),
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+            },
+            GalleryImage {
+                account_id: None,
+                account_url: None,
+                in_most_viral: Some(false),
+                image: Image {
+                    id: "OL6tC".to_string(),
+                    title: None,
+                    description: None,
+                    datetime: datetime!(2013-01-10 22:18:41.0 UTC),
+                    mime_type: "image/jpeg".to_string(),
+                    animated: false,
+                    width: 2592,
+                    height: 1944,
+                    size: 1443262,
+                    views: 1508,
+                    bandwidth: 2176439096,
+                    link: Some("https://i.imgur.com/OL6tC.jpg".parse().unwrap()),
+                    deletehash: None,
+                    favorite: Some(false),
+                    gifv: None,
+                    in_gallery: Some(false),
+                    looping: None,
+                    mp4: None,
+                    mp4_size: None,
+                    name: None,
+                    nsfw: None,
+                    section: None,
+                    vote: None,
+                },
+            },
+        ];
+
+        for (a, b) in images.iter().zip(expected_images.iter()) {
+            assert_eq!(a, b);
+        }
+
+        assert_eq!(images, expected_images);
     }
 }

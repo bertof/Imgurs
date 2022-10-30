@@ -1,8 +1,7 @@
 //! Account settings specification
 
+use super::common::{AccountID, ProExpiration};
 use serde::{Deserialize, Serialize};
-
-use crate::model::common::{AccountID, ProExpiration};
 
 /// The account settings, only accessible if you're logged in as the user.
 ///
@@ -18,6 +17,7 @@ pub struct AccountSettings {
     /// Automatically allow all images to be publicly accessible
     public_images: bool,
     /// Set the album privacy to this privacy setting on creation
+    /// TODO: switch to enum
     album_privacy: String,
     /// False if not a pro user, their expiration date if they are.
     pro_expiration: ProExpiration,
@@ -48,37 +48,32 @@ pub struct BlockedUser {
 
 #[cfg(test)]
 mod test {
-    use std::error::Error;
+    use crate::model::{
+        account_settings::{AccountSettings, BlockedUser},
+        common::ProExpiration,
+    };
 
-    use crate::model::account_settings::AccountSettings;
-    use crate::model::basic::Basic;
-
-    #[test]
-    fn test_deserialize_account_settings_local() -> Result<(), Box<dyn Error>> {
-        let data = r#"{
-            "data": {
-                "email": "josh@imgur.com",
-                "public_images": false,
-                "album_privacy": "secret",
-                "pro_expiration": false,
-                "accepted_gallery_terms": true,
-                "active_emails": [],
-                "messaging_enabled": true,
-                "blocked_users": [{
-                    "blocked_id" : 384077,
-                    "blocked_url": "joshTest"
-                }],
-                "show_mature": false,
-                "first_party": true
-            },
-            "success": true,
-            "status": 200
-        }"#;
-
-        let account_settings = serde_json::from_str::<Basic<AccountSettings>>(data)?;
-
-        println!("{:#?}", account_settings);
-
-        Ok(())
-    }
+    // #[test]
+    // fn test_deserialize_account_settings_example() {
+    //     let data = include_str!("../../model_data/account_settings.example.json");
+    //     let account_settings = serde_json::from_str::<DataModelAdapter<AccountSettings>>(data)
+    //         .unwrap()
+    //         .data;
+    //     assert_eq!(account_settings.email, "josh@imgur.com");
+    //     assert!(!account_settings.public_images);
+    //     assert_eq!(account_settings.album_privacy, "secret");
+    //     assert_eq!(account_settings.pro_expiration, ProExpiration::Bool(false));
+    //     assert!(account_settings.accepted_gallery_terms);
+    //     assert_eq!(account_settings.active_emails, Vec::<String>::new());
+    //     assert!(account_settings.messaging_enabled);
+    //     assert_eq!(
+    //         account_settings.blocked_users,
+    //         vec![BlockedUser {
+    //             blocked_id: 384077,
+    //             blocked_url: "joshTest".to_string()
+    //         }]
+    //     );
+    //     assert!(!account_settings.show_mature);
+    //     assert!(account_settings.first_party);
+    // }
 }

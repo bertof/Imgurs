@@ -1,21 +1,15 @@
 //! Conversation specification
 
+use super::{basic::DataModelAdapter, common::AccountID, message::Message};
 use serde::{Deserialize, Serialize};
 use time::{serde::timestamp, OffsetDateTime};
 
-use crate::model::common::AccountID;
-use crate::model::message::Message;
-
 /// The base model for a conversation.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[serde(deny_unknown_fields)]
-pub struct Conversation(pub Vec<ConversationEntry>);
+pub type Conversation = Vec<DataModelAdapter<ConversationEntry>>;
 
 /// An item of a conversation
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-#[serde(deny_unknown_fields)]
 pub struct ConversationEntry {
     /// Conversation ID
     pub id: u64,
@@ -42,32 +36,19 @@ pub struct ConversationEntry {
 
 #[cfg(test)]
 mod test {
-    use std::error::Error;
-
-    use crate::model::basic::Basic;
-    use crate::model::conversation::Conversation;
+    use crate::model::{basic::DataModelAdapter, conversation::Conversation};
+    use time::macros::datetime;
 
     #[test]
-    fn test_deserialize_conversation_local() -> Result<(), Box<dyn Error>> {
-        let res = r#"{
-            "data": [
-                {
-                    "id": 188129,
-                    "with_account": "jasdev",
-                    "with_account_id": 3698510,
-                    "last_message_preview": "hi",
-                    "message_count": 3,
-                    "datetime": 1406927327
-                }
-            ],
-            "success": true,
-            "status": 200
-        }"#;
-
-        let data = serde_json::from_str::<Basic<Conversation>>(res)?;
-
-        println!("{:#?}", data);
-
-        Ok(())
+    fn test_deserialize_conversation_example() {
+        let res = include_str!("../../model_data/conversation.example.json");
+        let data = serde_json::from_str::<Conversation>(res).unwrap();
+        let message = &data[0].data;
+        assert_eq!(message.id, 188129);
+        assert_eq!(message.with_account, "jasdev");
+        assert_eq!(message.with_account_id, 3698510);
+        assert_eq!(message.last_message_preview, "hi");
+        assert_eq!(message.message_count, 3);
+        assert_eq!(message.datetime, datetime!(2014-08-01 21:08:47.0 UTC));
     }
 }

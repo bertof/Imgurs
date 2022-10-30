@@ -1,0 +1,21 @@
+{
+  "data": {
+    "avatar": "https://imgur.com/user/bertof/avatar?maxwidth=290",
+    "avatar_name": "default/B",
+    "bio": null,
+    "cover": "https://imgur.com/user/bertof/cover?maxwidth=2560",
+    "cover_name": "default/1-space",
+    "created": 1490305680,
+    "id": 57420253,
+    "is_blocked": false,
+    "pro_expiration": false,
+    "reputation": 4,
+    "reputation_name": "Neutral",
+    "url": "bertof",
+    "user_follow": {
+      "status": false
+    }
+  },
+  "status": 200,
+  "success": true
+}

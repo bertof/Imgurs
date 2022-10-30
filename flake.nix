@@ -74,6 +74,7 @@
             bacon
             cargo-audit
             cargo-outdated
+            cargo-watch
             crate2nix
             openssl.dev
             pkg-config

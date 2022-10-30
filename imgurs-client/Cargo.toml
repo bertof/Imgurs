@@ -13,17 +13,20 @@ description = "Client for a typed and safe interface to the Imgur API"
 
 [dependencies]
 async-trait = "0.1"
-imgurs-model = "0.2"
+imgurs-model = { version = "0.2", path = "../imgurs-model" }
 reqwest = { version = "0.11", features = [ "json", "rustls-tls" ], default-features = false }
 serde_json = "1.0"
 serde = { version = "1.0", features = [ "derive" ] }
-time = { version = "0.3", features = [ "serde", "macros", "serde-human-readable", "serde-well-known" ] }
-tracing = { version = "0.1", features = [ "attributes" ] }
+time = { version = "0.3", features = [ "serde", "serde-well-known" ] }
+thiserror = "*"
+tracing = { version = "0.1", optional = true }
 url = { version = "2.2", features = [ "serde" ] }
 
 [dev-dependencies]
 tokio = { version = "1.13", features = [ "rt-multi-thread", "macros" ] }
+time = { version = "0.3", features = [ "serde", "macros", "serde-well-known" ] }
 
 [features]
-default = []
-log = ["tracing/log"]
+default = [ "tracing" ]
+tracing = [ "dep:tracing" ]
+log = [ "tracing/log" ]

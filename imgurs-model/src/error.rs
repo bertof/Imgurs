@@ -9,6 +9,15 @@ use serde::{Deserialize, Serialize};
 #[serde(deny_unknown_fields)]
 pub struct ErrorMessage(pub String);
 
+impl<'a, I> From<I> for ErrorMessage
+where
+    I: Iterator<Item = &'a ErrorMessage>,
+{
+    fn from(i: I) -> Self {
+        Self(i.map(|e| e.0.as_str()).collect::<Vec<_>>().join("; "))
+    }
+}
+
 impl ErrorMessage {
     /// `ErrorMessage` constructor
     pub fn new<T>(message: T) -> Self
